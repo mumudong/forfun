@@ -1,21 +1,11 @@
-package kafka;
+package kafka.kafka_demo;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
+import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.concurrent.Semaphore;
 
-import org.apache.kafka.clients.consumer.ConsumerRebalanceListener;
-import org.apache.kafka.clients.consumer.ConsumerRecord;
-import org.apache.kafka.clients.consumer.ConsumerRecords;
-import org.apache.kafka.clients.consumer.KafkaConsumer;
-import org.apache.kafka.clients.consumer.OffsetAndMetadata;
+import org.apache.kafka.clients.consumer.*;
 import org.apache.kafka.common.TopicPartition;
 import org.apache.log4j.Logger;
 
@@ -59,13 +49,13 @@ public class TopicPartitionThread extends Thread{
 //                        offsetsMap.clear();
 //                        //清空taskList列表
 //                        taskList.clear();
-////                        for (TopicPartition partition : partitions) {
-////                            System.out.println("*- partition:"+partition.partition());
-////                            //获取消费偏移量，实现原理是向协调者发送获取请求
-////                            OffsetAndMetadata offset = consumer.committed(partition);
-////                            //设置本地拉取分量，下次拉取消息以这个偏移量为准
-////                            consumer.seek(partition, offset.offset());
-////                        }
+//                        for (TopicPartition partition : partitions) {
+//                            System.out.println("*- partition:"+partition.partition());
+//                            //获取消费偏移量，实现原理是向协调者发送获取请求
+//                            OffsetAndMetadata offset = consumer.committed(partition);
+//                            //设置本地拉取分量，下次拉取消息以这个偏移量为准
+//                            consumer.seek(partition, offset.offset());
+//                        }
 //                    }}
                     );
 

@@ -1,4 +1,4 @@
-package kafka;
+package kafka.kafka_demo;
 
 import org.apache.log4j.Logger;
 
