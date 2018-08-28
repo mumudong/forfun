@@ -1,0 +1,36 @@
+syntax = "proto3";
+package fengkong;
+service FKPredict {
+  rpc CardPredict(DataReq) returns (DataResp){}
+}
+message DataReq {
+  string text = 1; // 用户id
+  // int32 loan_amnt = 2; // 借款金额
+  // string term = 3; // 借款期限
+  // string loan_status = 4;
+  // string int_rate = 5; // 利率
+  // string emp_length = 6;
+  // string home_ownership = 7; // 房屋状态
+  // int32 annual_inc = 8;
+  // string verification_status = 9; //验证状态
+  // string desc = 10;
+  // string purpose = 11;
+  // string title = 12;
+  // string zip_code = 13;
+  // string addr_state = 14; // 地址
+  // float dti = 15;
+  // int32 delinq_2yrs = 16;
+  // int32 inq_last_6mths = 17;
+  // int32 mths_since_last_delinq = 18;
+  // int32 mths_since_last_record = 19;
+  // int32 open_acc = 20;
+  // int32 pub_rec = 21;
+  // int32 total_acc = 22;
+  // int32 pub_rec_bankruptcies = 23;
+  // string issue_d = 24;
+  // string earliest_cr_line = 25;
+}
+message DataResp {
+  int32 id = 1; // 用户id
+  int32 result = 2; // 预测分数
+}

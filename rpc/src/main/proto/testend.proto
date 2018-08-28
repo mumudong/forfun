@@ -1,0 +1,20 @@
+option java_package = "hbase.coprocessor.endpoint";
+option java_outer_classname = "EndpointTestProtos";
+option java_generic_services = true;
+option java_generate_equals_and_hash = true;
+option optimize_for = SPEED;
+message CountRequest {
+       required string startKey = 1;
+       required string endKey = 2;
+}
+
+message CountResponse {
+       required int64 count = 1 [default = 0];
+}
+ /*提供服务的类
+  *该类没有Builder内部类
+  */
+service CountService {
+       rpc count(CountRequest)
+            returns (CountResponse);
+}

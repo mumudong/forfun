@@ -1,0 +1,7 @@
+exactly-once:
+    need:  transactional spout + transaction state
+        or transactional spout + opaque transactional state
+        or opaque transaction spout + opaque transactional state
+
+    not:
+        opaque transactional spout + transactional state

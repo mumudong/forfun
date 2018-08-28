@@ -1,0 +1,22 @@
+<configuration>
+    <property>
+        <name>nodeHost</name>
+        <value>hadoop-5,hadoop-6,hadoop-7</value>
+    </property>
+    <property>
+        <name>nodePort</name>
+        <value>9300</value>
+    </property>
+    <property>
+        <name>indexName</name>
+        <value>tx</value>
+    </property>
+    <property>
+        <name>typeName</name>
+        <value>baidu_news</value>
+    </property>
+    <property>
+        <name>clusterName</name>
+        <value>es-tx</value>
+    </property>
+</configuration>
