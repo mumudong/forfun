@@ -28,8 +28,8 @@ public class HdfsKerberosDemo {
     public void getset() throws Exception {
 //		System.setProperty("HADOOP_USER_NAME", "hdfs");
         //默认加载/src配置文件 core-site.xml  hdfs-site.xml
-        String user = "tianzt";
-        String keytab = "C:\\Users\\Administrator\\Downloads\\tianzt.keytab";
+        String user = "hdfs/hadoop-9@EXAMPLE.COM";
+        String keytab = "C:\\Users\\Administrator\\Downloads\\hdfs-hadoop9.keytab";
         conf = new Configuration();
         conf.set("dfs.nameservices", "tianxi-ha");
         conf.set("dfs.ha.namenodes.tianxi-ha", "nn1,nn2");
@@ -70,9 +70,12 @@ public class HdfsKerberosDemo {
 
     @Test
     public void put() throws Exception {
-        Path path = new Path("/test/aaa.txt");
+        long start = System.currentTimeMillis();
+        Path path = new Path("/test/架构设计与分层.mp4");
         FSDataOutputStream out = fs.create(path);
-        IOUtils.copyBytes(new FileInputStream(new File("D:/HDFS/aaa.txt")), out, conf);
+        IOUtils.copyBytes(new FileInputStream(new File("C:\\Users\\Administrator\\Desktop\\hdfs\\架构设计与分层.mp4")), out, conf);
+        long stop = System.currentTimeMillis();
+        System.out.println("上传文件耗时：" + (stop-start)/1000);
     }
 
     @Test
