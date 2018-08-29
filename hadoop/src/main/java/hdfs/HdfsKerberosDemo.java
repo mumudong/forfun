@@ -28,8 +28,8 @@ public class HdfsKerberosDemo {
     public void getset() throws Exception {
 //		System.setProperty("HADOOP_USER_NAME", "hdfs");
         //默认加载/src配置文件 core-site.xml  hdfs-site.xml
+        String basePath = HdfsKerberosDemo.class.getResource("/").toString();
         String user = "hdfs/hadoop-9@EXAMPLE.COM";
-        String keytab = "C:\\Users\\Administrator\\Downloads\\hdfs-hadoop9.keytab";
         conf = new Configuration();
         conf.set("dfs.nameservices", "tianxi-ha");
         conf.set("dfs.ha.namenodes.tianxi-ha", "nn1,nn2");
@@ -37,9 +37,9 @@ public class HdfsKerberosDemo {
         conf.set("dfs.namenode.rpc-address.tianxi-ha.nn2", "hadoop-2:8020");
         conf.set("dfs.client.failover.proxy.provider.ns1", "org.apache.hadoop.hdfs.server.namenode.ha.ConfiguredFailoverProxyProvider");
         conf.set("hadoop.security.authentication","kerberos");
-        System.setProperty("java.security.krb5.conf", "C:\\Users\\Administrator\\Downloads\\krb5.conf");
+        System.setProperty("java.security.krb5.conf", basePath.substring(6) + "krb5.conf");
         UserGroupInformation.setConfiguration(conf);
-        UserGroupInformation.loginUserFromKeytab(user, keytab);
+        UserGroupInformation.loginUserFromKeytab(user, basePath.substring(6) + "hdfs-hadoop9.keytab");
         fs = FileSystem.get(conf);
     }
 
