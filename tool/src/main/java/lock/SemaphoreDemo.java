@@ -9,6 +9,7 @@ import java.util.concurrent.locks.ReentrantLock;
 public class SemaphoreDemo {
     private final Semaphore semaphore ;
     private boolean resourceArray[];
+
     private final ReentrantLock lock;
     public SemaphoreDemo() {
         this.resourceArray = new boolean[10];//存放厕所状态    
@@ -69,10 +70,10 @@ class ResourceUser implements Runnable {
     }
 
     public static void main(String[] args) {
-        lock.SemaphoreDemo SemaphoreDemo = new SemaphoreDemo();
+        lock.SemaphoreDemo semaphoreDemo = new SemaphoreDemo();
         Thread[] threads = new Thread[100];
         for (int i = 0; i < 100; i++) {
-            Thread thread = new Thread(new ResourceUser(SemaphoreDemo, i));//创建多个资源使用者
+            Thread thread = new Thread(new ResourceUser(semaphoreDemo, i));//创建多个资源使用者
             threads[i] = thread;
         }
         for (int i = 0; i < 100; i++) {
