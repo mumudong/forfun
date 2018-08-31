@@ -27,21 +27,32 @@ public class JavaKafkaSimpleConsumerAPI {
     private long retryIntervalMillis = 1000;
     // 缓存Topic/Partition对应的Broker连接信息
     private Map<KafkaTopicPartitionInfo, List<KafkaBrokerInfo>> replicaBrokers = new HashMap<KafkaTopicPartitionInfo, List<KafkaBrokerInfo>>();
+    List<KafkaBrokerInfo> seedBrokers ;
+    private String iHost;
+    private int iPort;
+
+    public JavaKafkaSimpleConsumerAPI(List<KafkaBrokerInfo> seedBrokers) {
+        this.seedBrokers = seedBrokers;
+        this.iHost = seedBrokers.get(0).brokerHost;
+        this.iPort = seedBrokers.get(0).brokerPort;
+    }
+
+    public JavaKafkaSimpleConsumerAPI() {
+    }
 
     /**
      * 运行入口
      *
      * @param maxReads           最多读取记录数量
      * @param topicPartitionInfo 读取数据的topic分区信息
-     * @param seedBrokers        连接topic分区的初始化连接信息
+     *         seedBrokers        连接topic分区的初始化连接信息
      * @throws Exception
      */
     public void run(long maxReads,
-                    KafkaTopicPartitionInfo topicPartitionInfo,
-                    List<KafkaBrokerInfo> seedBrokers) throws Exception {
+                    KafkaTopicPartitionInfo topicPartitionInfo) throws Exception {
         // 默认消费数据的偏移量是当前分区的最早偏移量值
         long whichTime = kafka.api.OffsetRequest.EarliestTime();
-
+        long newTime = kafka.api.OffsetRequest.LatestTime();
         // 构建client name及groupId
         String topic = topicPartitionInfo.topic;
         int partitionID = topicPartitionInfo.partitionID;
@@ -65,6 +76,7 @@ public class JavaKafkaSimpleConsumerAPI {
             long readOffSet = -1;
             while (true) {
                 readOffSet = this.getLastOffSet(consumer, groupId, topic, partitionID, whichTime, clientName);
+                System.out.println("run 获取偏移量：" + readOffSet);
                 if (readOffSet == -1) {
                     // 当返回为-1的时候，表示异常信息
                     if (times > this.maxRetryTimes) {
@@ -89,7 +101,7 @@ public class JavaKafkaSimpleConsumerAPI {
                 // 构建获取数据的请求对象， 给定获取数据对应的topic、partition、offset以及每次获取数据最多获取条数
                 kafka.api.FetchRequest request = new FetchRequestBuilder()
                         .clientId(clientName)
-                        .addFetch(topic, partitionID, readOffSet, 100000)
+                        .addFetch(topic, partitionID, readOffSet, 2)
                         .build();
 
                 // 发送请求到Kafka，并获得返回值
@@ -137,6 +149,7 @@ public class JavaKafkaSimpleConsumerAPI {
                     byte[] bytes = new byte[payload.limit()];
                     payload.get(bytes);
                     System.out.println(currentOffset + ": " + new String(bytes, "UTF-8"));
+                    System.out.println("我一次最多获取两条记录......");
                     numRead++;
                     maxReads--;
                 }
@@ -282,9 +295,10 @@ public class JavaKafkaSimpleConsumerAPI {
     public long getLastOffSet(SimpleConsumer consumer, String groupId,
                               String topic, int partitionID,
                               long whichTime, String clientName) {
-        // 1. 从ZK中获取偏移量，当zk的返回偏移量大于0的时候，表示是一个正常的偏移量
+        // 1. 从ZK中获取偏移量，当zk的返回偏移量大于0的时候，表示是一个正常的偏移
         long offset = this.getOffsetOfTopicAndPartition(consumer, groupId, clientName, topic, partitionID);
         if (offset > 0) {
+            System.out.println("getLastOffSet zookeeper:" + offset);
             return offset;
         }
 
@@ -303,6 +317,7 @@ public class JavaKafkaSimpleConsumerAPI {
 
         // 获取偏移量
         long[] offsets = response.offsets(topic, partitionID);
+        System.out.println("run 获取最早偏移量:" + offsets[0]);
         return offsets[0];
     }
 
@@ -522,7 +537,7 @@ public class JavaKafkaSimpleConsumerAPI {
      * @param clientId   client连接ID
      * @return
      */
-    public static List<Integer> fetchTopicPartitionIDs(List<KafkaBrokerInfo> brokers, String topic, int soTimeout, int bufferSize, String clientId) {
+    public   List<Integer> fetchTopicPartitionIDs(List<KafkaBrokerInfo> brokers, String topic, int soTimeout, int bufferSize, String clientId) {
         Set<Integer> partitionIDs = new HashSet<Integer>();
 
         List<String> topics = Collections.singletonList(topic);
@@ -549,9 +564,20 @@ public class JavaKafkaSimpleConsumerAPI {
                     if (metadata.errorCode() == ErrorMapping.NoError()) {
                         // 没有异常的情况下才进行处理
                         if (topic.equals(metadata.topic())) {
-                            // 处理当前topic对应的分区
                             for (PartitionMetadata part : metadata.partitionsMetadata()) {
+                                // 处理当前topic对应的分区
+                                PartitionMetadata rmetadata = findLeader(seedBrokers, topic, part.partitionId());
+                                // 校验元数据
+                                this.validatePartitionMetadata(rmetadata);
+                                // 连接leader节点构建具体的SimpleConsumer对象
+                                SimpleConsumer rconsumer = this.createSimpleConsumer(rmetadata.leader().host(),
+                                        rmetadata.leader().port(), clientId);
                                 partitionIDs.add(part.partitionId());
+                                /**获取对应分区起止偏移量*/
+                                long start = getOffSet(rconsumer,clientId,topic,part.partitionId(),kafka.api.OffsetRequest.EarliestTime(),clientId);
+                                long end = getOffSet(rconsumer,clientId,topic,part.partitionId(),kafka.api.OffsetRequest.LatestTime(),clientId);
+                                System.out.println(String.format("%d分区的起止偏移量为%d -- %d", part.partitionId(),start,end));
+                                closeSimpleConsumer(rconsumer);
                             }
                             // 处理完成，结束循环
                             break;
@@ -567,4 +593,32 @@ public class JavaKafkaSimpleConsumerAPI {
         // 返回结果
         return new ArrayList<Integer>(partitionIDs);
     }
+    public void getOffsetRange(){
+        long whichTime = kafka.api.OffsetRequest.EarliestTime();
+        long newTime = kafka.api.OffsetRequest.LatestTime();
+        SimpleConsumer consumer = this.createSimpleConsumer(this.iHost,this.iPort,"range");
+        List<Integer> ids = fetchTopicPartitionIDs(seedBrokers,"test", 100000, 64 * 1024, "range");
+    }
+    public static long getOffSet(SimpleConsumer consumer, String groupId,
+                              String topic, int partitionID,
+                              long whichTime, String clientName) {
+
+        // 获取当前topic当前分区的数据偏移量
+        TopicAndPartition topicAndPartition = new TopicAndPartition(topic, partitionID);
+        Map<TopicAndPartition, PartitionOffsetRequestInfo> requestInfoMap = new HashMap<TopicAndPartition, PartitionOffsetRequestInfo>();
+        requestInfoMap.put(topicAndPartition, new PartitionOffsetRequestInfo(whichTime, 1));
+
+        OffsetRequest request = new OffsetRequest(requestInfoMap, kafka.api.OffsetRequest.CurrentVersion(), clientName);
+        OffsetResponse response = consumer.getOffsetsBefore(request);
+
+        if (response.hasError()) {
+            System.out.println("Error fetching data Offset Data the Broker. Reason: " + response.errorCode(topic, partitionID));
+            return -1;
+        }
+
+        // 获取偏移量
+        long[] offsets = response.offsets(topic, partitionID);
+        return offsets[0];
+    }
+
 }

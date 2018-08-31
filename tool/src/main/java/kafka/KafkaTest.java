@@ -27,18 +27,15 @@ public class KafkaTest {
         props.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer");
         props.put("value.serializer", "org.apache.kafka.common.serialization.StringSerializer");
         producer = new KafkaProducer<String, String>(props);
-        produce(producer,"b");
-        produce(producer,"a");
-        produce(producer,"c");
-        produce(producer,"d");
-        produce(producer,"e");
-        produce(producer,"f");
+        for(int i = 0; i< 20;i++){
+            produce(producer,"test......" + i);
+        }
         close(producer);
 //        System.out.println(Long.MAX_VALUE + 1);
 //        System.out.println(Long.MAX_VALUE );
     }
     public static void produce(KafkaProducer producer,String str){
-        producer.send(new ProducerRecord<String, String>("stormtx", str));
+        producer.send(new ProducerRecord<String, String>("test", str));
     }
     public static void close(KafkaProducer producer){
         producer.close();

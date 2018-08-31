@@ -52,13 +52,13 @@ public class SASL {
     }
     @Test
     public void saslConsumer(){
-        String fsPath="C:\\Users\\Administrator\\Desktop\\hadoop-conf\\";
-        System.setProperty("java.security.krb5.conf", fsPath+"krb5.conf");
-        System.setProperty("java.security.auth.login.config", fsPath+"kafka_client_jaas.conf");
+//        String fsPath="C:\\Users\\Administrator\\Desktop\\hadoop-conf\\";
+//        System.setProperty("java.security.krb5.conf", fsPath+"krb5.conf");
+//        System.setProperty("java.security.auth.login.config", fsPath+"kafka_client_jaas.conf");
         // 环境变量添加，需要输入配置文件的路径System.out.println("===================配置文件地址"+fsPath+"\\conf\\cons_client_jaas.conf");
         Properties props = new Properties();
         props.put("bootstrap.servers", "hadoop-5:6667");
-        props.put("group.id", "sasl-group");
+        props.put("group.id", "sasl-group2");
         props.put("enable.auto.commit", "true");//自动提交offset  false则手动提交  consumer.commitSync
         props.put("auto.commit.interval.ms", "1000");
         props.put("session.timeout.ms", "30000");
@@ -66,8 +66,8 @@ public class SASL {
         props.put("value.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
         props.put("auto.offset.reset", "earliest");
         props.put("offsets.storage","kafka");
-        props.setProperty ("security.protocol", "SASL_PLAINTEXT");
-        props.setProperty ("sasl.mechanism", "GSSAPI");
+//        props.setProperty ("security.protocol", "SASL_PLAINTEXT");
+//        props.setProperty ("sasl.mechanism", "GSSAPI");
         KafkaConsumer<String,String> kafkaConsumer = new KafkaConsumer<String,String>(props);
         kafkaConsumer.subscribe(Arrays.asList("test"));
         while (true) {
