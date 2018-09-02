@@ -71,7 +71,7 @@ public class ChatRoomServer {
             sc.register(selector, SelectionKey.OP_READ);
 
             //将此对应的channel设置为准备接受其他客户端请求
-            sk.interestOps(SelectionKey.OP_ACCEPT);
+//            sk.interestOps(SelectionKey.OP_ACCEPT);
             System.out.println("Server is listening from client :" + sc.getRemoteAddress());
             sc.write(charset.encode("Please input your name."));
         }
@@ -92,7 +92,7 @@ public class ChatRoomServer {
                 }
                 System.out.println("Server is listening from client " + sc.getRemoteAddress() + " data rev is: " + content);
                 //将此对应的channel设置为准备下一次接受数据
-                sk.interestOps(SelectionKey.OP_READ);
+//                sk.interestOps(SelectionKey.OP_READ);
             }
             catch (IOException io)
             {
@@ -122,7 +122,7 @@ public class ChatRoomServer {
                 else if(arrayContent != null && arrayContent.length >1){
                     String name = arrayContent[0];
                     String message = content.substring(name.length()+USER_CONTENT_SPILIT.length());
-                    message = name + " say " + message;
+                    message = name + " ：" + message;
                     if(users.contains(name)) {
                         //不回发给发送此内容的客户端
                         BroadCast(selector, sc, message);
