@@ -12,6 +12,7 @@ import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.input.KeyValueTextInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
+import org.apache.hadoop.security.UserGroupInformation;
 
 /**
  * hadoop jar statistic-mr.jar com.statistic.script.Main -libjars /path/cascading-core-2.5.jar,/path/cascading-hadoop-2.5.jar
@@ -22,12 +23,27 @@ public class JobRunner {
 		MyCounter;
 	}
 
-	public static void main(String[] args) {
+	public static void main(String[] args)throws Exception {
 		Configuration config =new Configuration();
-        config.set("mapred.jar", "D:\\ksdler\\git_repository\\test\\target\\test-1.0-SNAPSHOT.jar");
+        config.set("mapred.jar", "D:\\ksdler\\git_repository\\forfun\\hadoop\\target\\hadoop-1.0-SNAPSHOT.jar");
 
 //        config.set("mapreduce.application.classpath", System.getProperty("user.dir"));
 		System.setProperty("HADOOP_USER_NAME","hdfs");
+
+        String basePath = HdfsKerberosDemo.class.getResource("/").toString();
+        String user = "hdfs";
+        config.set("dfs.nameservices", "tianxi-ha");
+        config.set("dfs.ha.namenodes.tianxi-ha", "nn1,nn2");
+        config.set("dfs.namenode.rpc-address.tianxi-ha.nn1", "hadoop-1:8020");
+        config.set("dfs.namenode.rpc-address.tianxi-ha.nn2", "hadoop-2:8020");
+        config.set("dfs.client.failover.proxy.provider.ns1", "org.apache.hadoop.hdfs.server.namenode.ha.ConfiguredFailoverProxyProvider");
+        config.set("hadoop.security.authentication","kerberos");
+        config.set("hadoop.registry.client.auth","kerberos");
+        System.setProperty("java.security.krb5.conf", basePath.substring(6) + "krb5.conf");
+        UserGroupInformation.setConfiguration(config);
+        UserGroupInformation.loginUserFromKeytab(user, basePath.substring(6) + "hdfs.keytab");
+
+
 		try {
 			FileSystem fs =FileSystem.get(config);
 			double d =0.001;

@@ -71,6 +71,12 @@ object WCKafkaRedisApp {
 
                 userClicks.foreachPartition(partitionOfRecords => {
                                     partitionOfRecords.foreach(pair => {
+                                        /**
+                                          * 存储数据时增加一列 offset
+                                          *     如  word  count  offset
+                                          *          a     11     { "topic":test,"partitionId":0,"offset":20}
+                                          *    wordcount入库时先判断当前offset是否已消费
+                                          */
                                         val uid = pair._1
                                         val clickCount = pair._2
                                         println(uid,"----",clickCount)

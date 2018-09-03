@@ -28,9 +28,9 @@ public class HdfsKerberosDemo {
     public void getset() throws Exception {
 //		System.setProperty("HADOOP_USER_NAME", "hdfs");
         //默认加载/src配置文件 core-site.xml  hdfs-site.xml
+        conf = new Configuration();
         String basePath = HdfsKerberosDemo.class.getResource("/").toString();
         String user = "hdfs/hadoop-9@EXAMPLE.COM";
-        conf = new Configuration();
         conf.set("dfs.nameservices", "tianxi-ha");
         conf.set("dfs.ha.namenodes.tianxi-ha", "nn1,nn2");
         conf.set("dfs.namenode.rpc-address.tianxi-ha.nn1", "hadoop-1:8020");
