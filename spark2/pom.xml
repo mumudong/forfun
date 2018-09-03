@@ -12,7 +12,7 @@
     <artifactId>spark2</artifactId>
 
     <name>spark2</name>
-    <!-- FIXME change it to the project's website -->
+    <!-- http://lib.csdn.net/article/machinelearning/40643 -->
     <url>http://www.example.com</url>
 
     <properties>
