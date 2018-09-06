@@ -47,7 +47,7 @@
     
     <property>
       <name>dfs.datanode.address</name>
-      <value>0.0.0.0:1019</value>
+      <value>0.0.0.0:50010</value>
     </property>
     
     <property>
@@ -79,7 +79,7 @@
     
     <property>
       <name>dfs.datanode.http.address</name>
-      <value>0.0.0.0:1022</value>
+      <value>0.0.0.0:50075</value>
     </property>
     
     <property>
@@ -90,16 +90,6 @@
     <property>
       <name>dfs.datanode.ipc.address</name>
       <value>0.0.0.0:8010</value>
-    </property>
-    
-    <property>
-      <name>dfs.datanode.kerberos.principal</name>
-      <value>dn/_HOST@EXAMPLE.COM</value>
-    </property>
-    
-    <property>
-      <name>dfs.datanode.keytab.file</name>
-      <value>/etc/security/keytabs/dn.service.keytab</value>
     </property>
     
     <property>
@@ -178,21 +168,6 @@
     </property>
     
     <property>
-      <name>dfs.journalnode.kerberos.internal.spnego.principal</name>
-      <value>HTTP/_HOST@EXAMPLE.COM</value>
-    </property>
-    
-    <property>
-      <name>dfs.journalnode.kerberos.principal</name>
-      <value>jn/_HOST@EXAMPLE.COM</value>
-    </property>
-    
-    <property>
-      <name>dfs.journalnode.keytab.file</name>
-      <value>/etc/security/keytabs/jn.service.keytab</value>
-    </property>
-    
-    <property>
       <name>dfs.namenode.accesstime.precision</name>
       <value>0</value>
     </property>
@@ -265,21 +240,6 @@
     <property>
       <name>dfs.namenode.inode.attributes.provider.class</name>
       <value>org.apache.ranger.authorization.hadoop.RangerHdfsAuthorizer</value>
-    </property>
-    
-    <property>
-      <name>dfs.namenode.kerberos.internal.spnego.principal</name>
-      <value>HTTP/_HOST@EXAMPLE.COM</value>
-    </property>
-    
-    <property>
-      <name>dfs.namenode.kerberos.principal</name>
-      <value>nn/_HOST@EXAMPLE.COM</value>
-    </property>
-    
-    <property>
-      <name>dfs.namenode.keytab.file</name>
-      <value>/etc/security/keytabs/nn.service.keytab</value>
     </property>
     
     <property>
@@ -360,16 +320,6 @@
     </property>
     
     <property>
-      <name>dfs.web.authentication.kerberos.keytab</name>
-      <value>/etc/security/keytabs/spnego.service.keytab</value>
-    </property>
-    
-    <property>
-      <name>dfs.web.authentication.kerberos.principal</name>
-      <value>HTTP/_HOST@EXAMPLE.COM</value>
-    </property>
-    
-    <property>
       <name>dfs.webhdfs.enabled</name>
       <value>true</value>
       <final>true</final>
@@ -388,16 +338,6 @@
     <property>
       <name>nfs.file.dump.dir</name>
       <value>/tmp/.hdfs-nfs</value>
-    </property>
-    
-    <property>
-      <name>nfs.kerberos.principal</name>
-      <value>nfs/_HOST@EXAMPLE.COM</value>
-    </property>
-    
-    <property>
-      <name>nfs.keytab.file</name>
-      <value>/etc/security/keytabs/nfs.service.keytab</value>
     </property>
     
   </configuration>

@@ -1,28 +1,8 @@
   <configuration>
     
     <property>
-      <name>hadoop.registry.client.auth</name>
-      <value>kerberos</value>
-    </property>
-    
-    <property>
-      <name>hadoop.registry.jaas.context</name>
-      <value>Client</value>
-    </property>
-    
-    <property>
       <name>hadoop.registry.rm.enabled</name>
       <value>true</value>
-    </property>
-    
-    <property>
-      <name>hadoop.registry.secure</name>
-      <value>true</value>
-    </property>
-    
-    <property>
-      <name>hadoop.registry.system.accounts</name>
-      <value>sasl:yarn,sasl:mapred,sasl:hadoop,sasl:hdfs,sasl:rm,sasl:hive</value>
     </property>
     
     <property>
@@ -37,7 +17,7 @@
     
     <property>
       <name>yarn.admin.acl</name>
-      <value>yarn,dr.who</value>
+      <value>activity_analyzer,yarn</value>
     </property>
     
     <property>
@@ -152,7 +132,7 @@
     
     <property>
       <name>yarn.nodemanager.container-executor.class</name>
-      <value>org.apache.hadoop.yarn.server.nodemanager.LinuxContainerExecutor</value>
+      <value>org.apache.hadoop.yarn.server.nodemanager.DefaultContainerExecutor</value>
     </property>
     
     <property>
@@ -193,11 +173,6 @@
     <property>
       <name>yarn.nodemanager.health-checker.script.timeout-ms</name>
       <value>60000</value>
-    </property>
-    
-    <property>
-      <name>yarn.nodemanager.keytab</name>
-      <value>/etc/security/keytabs/nm.service.keytab</value>
     </property>
     
     <property>
@@ -246,16 +221,6 @@
     </property>
     
     <property>
-      <name>yarn.nodemanager.pmem-check-enabled</name>
-      <value>false</value>
-    </property>
-    
-    <property>
-      <name>yarn.nodemanager.principal</name>
-      <value>nm/_HOST@EXAMPLE.COM</value>
-    </property>
-    
-    <property>
       <name>yarn.nodemanager.recovery.dir</name>
       <value>/var/log/hadoop-yarn/nodemanager/recovery-state</value>
     </property>
@@ -298,16 +263,6 @@
     <property>
       <name>yarn.nodemanager.vmem-pmem-ratio</name>
       <value>2.1</value>
-    </property>
-    
-    <property>
-      <name>yarn.nodemanager.webapp.spnego-keytab-file</name>
-      <value>/etc/security/keytabs/spnego.service.keytab</value>
-    </property>
-    
-    <property>
-      <name>yarn.nodemanager.webapp.spnego-principal</name>
-      <value>HTTP/_HOST@EXAMPLE.COM</value>
     </property>
     
     <property>
@@ -386,38 +341,8 @@
     </property>
     
     <property>
-      <name>yarn.resourcemanager.keytab</name>
-      <value>/etc/security/keytabs/rm.service.keytab</value>
-    </property>
-    
-    <property>
       <name>yarn.resourcemanager.nodes.exclude-path</name>
       <value>/etc/hadoop/conf/yarn.exclude</value>
-    </property>
-    
-    <property>
-      <name>yarn.resourcemanager.principal</name>
-      <value>rm/_HOST@EXAMPLE.COM</value>
-    </property>
-    
-    <property>
-      <name>yarn.resourcemanager.proxy-user-privileges.enabled</name>
-      <value>true</value>
-    </property>
-    
-    <property>
-      <name>yarn.resourcemanager.proxyuser.*.groups</name>
-      <value></value>
-    </property>
-    
-    <property>
-      <name>yarn.resourcemanager.proxyuser.*.hosts</name>
-      <value></value>
-    </property>
-    
-    <property>
-      <name>yarn.resourcemanager.proxyuser.*.users</name>
-      <value></value>
     </property>
     
     <property>
@@ -501,16 +426,6 @@
     </property>
     
     <property>
-      <name>yarn.resourcemanager.webapp.spnego-keytab-file</name>
-      <value>/etc/security/keytabs/spnego.service.keytab</value>
-    </property>
-    
-    <property>
-      <name>yarn.resourcemanager.webapp.spnego-principal</name>
-      <value>HTTP/_HOST@EXAMPLE.COM</value>
-    </property>
-    
-    <property>
       <name>yarn.resourcemanager.work-preserving-recovery.enabled</name>
       <value>true</value>
     </property>
@@ -522,7 +437,7 @@
     
     <property>
       <name>yarn.resourcemanager.zk-acl</name>
-      <value>sasl:rm:rwcda</value>
+      <value>world:anyone:rwcda</value>
     </property>
     
     <property>
@@ -656,73 +571,13 @@
     </property>
     
     <property>
-      <name>yarn.timeline-service.http-authentication.cookie.domain</name>
-      <value></value>
-    </property>
-    
-    <property>
-      <name>yarn.timeline-service.http-authentication.cookie.path</name>
-      <value></value>
-    </property>
-    
-    <property>
-      <name>yarn.timeline-service.http-authentication.kerberos.keytab</name>
-      <value>/etc/security/keytabs/spnego.service.keytab</value>
-    </property>
-    
-    <property>
-      <name>yarn.timeline-service.http-authentication.kerberos.name.rules</name>
-      <value></value>
-    </property>
-    
-    <property>
-      <name>yarn.timeline-service.http-authentication.kerberos.principal</name>
-      <value>HTTP/_HOST@EXAMPLE.COM</value>
-    </property>
-    
-    <property>
-      <name>yarn.timeline-service.http-authentication.proxyuser.*.groups</name>
-      <value></value>
-    </property>
-    
-    <property>
-      <name>yarn.timeline-service.http-authentication.proxyuser.*.hosts</name>
-      <value></value>
-    </property>
-    
-    <property>
-      <name>yarn.timeline-service.http-authentication.proxyuser.*.users</name>
-      <value></value>
-    </property>
-    
-    <property>
-      <name>yarn.timeline-service.http-authentication.proxyuser.ambari-server-tianxi.groups</name>
+      <name>yarn.timeline-service.http-authentication.proxyuser.root.groups</name>
       <value>*</value>
     </property>
     
     <property>
-      <name>yarn.timeline-service.http-authentication.proxyuser.ambari-server-tianxi.hosts</name>
+      <name>yarn.timeline-service.http-authentication.proxyuser.root.hosts</name>
       <value>hadoop-1</value>
-    </property>
-    
-    <property>
-      <name>yarn.timeline-service.http-authentication.signature.secret</name>
-      <value></value>
-    </property>
-    
-    <property>
-      <name>yarn.timeline-service.http-authentication.signature.secret.file</name>
-      <value></value>
-    </property>
-    
-    <property>
-      <name>yarn.timeline-service.http-authentication.signer.secret.provider</name>
-      <value></value>
-    </property>
-    
-    <property>
-      <name>yarn.timeline-service.http-authentication.signer.secret.provider.object</name>
-      <value></value>
     </property>
     
     <property>
@@ -731,18 +586,8 @@
     </property>
     
     <property>
-      <name>yarn.timeline-service.http-authentication.token.validity</name>
-      <value></value>
-    </property>
-    
-    <property>
       <name>yarn.timeline-service.http-authentication.type</name>
-      <value>kerberos</value>
-    </property>
-    
-    <property>
-      <name>yarn.timeline-service.keytab</name>
-      <value>/etc/security/keytabs/yarn.service.keytab</value>
+      <value>simple</value>
     </property>
     
     <property>
@@ -773,11 +618,6 @@
     <property>
       <name>yarn.timeline-service.leveldb-timeline-store.ttl-interval-ms</name>
       <value>300000</value>
-    </property>
-    
-    <property>
-      <name>yarn.timeline-service.principal</name>
-      <value>yarn/_HOST@EXAMPLE.COM</value>
     </property>
     
     <property>

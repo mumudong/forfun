@@ -20,7 +20,6 @@ import org.apache.spark.sql.{Row, SQLContext, SaveMode}
 import org.apache.spark.streaming.kafka.KafkaManager
 import org.apache.spark.streaming.{Durations, Seconds, StreamingContext}
 import org.apache.spark.unsafe.types.UTF8String
-import org.glassfish.grizzly.http.util.TimeStamp
 
 //@SQLUserDefinedType(udt = classOf[BaiduNewsUDT])
 case class BaiduNews(

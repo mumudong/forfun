@@ -4,9 +4,8 @@ import org.apache.spark.sql.SparkSession
 import org.apache.spark.util.AccumulatorV2
 
 import scala.collection.mutable
-
 /**
-  * scala默认使用不可变的容器
+  * scala 默认使用不可变的容器
   */
 object CustomAccumulator {
     def main(args: Array[String]): Unit = {
@@ -23,8 +22,8 @@ object CustomAccumulator {
         println("accum: " + accum.value)
         session.stop()
     }
-
 }
+
 class MyAccumulator extends AccumulatorV2[String,mutable.Set[String]]{
     val _mySet:mutable.Set[String] = mutable.Set[String]()
     override def isZero: Boolean = {_mySet.isEmpty}

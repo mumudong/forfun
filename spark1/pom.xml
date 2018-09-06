@@ -61,25 +61,20 @@
         <dependency>
             <groupId>org.apache.spark</groupId>
             <artifactId>spark-core_2.10</artifactId>
-            <version>1.6.0</version>
+            <version>1.6.3 </version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/org.apache.spark/spark-sql_2.10 -->
         <dependency>
             <groupId>org.apache.spark</groupId>
             <artifactId>spark-sql_2.10</artifactId>
-            <version>1.6.0</version>
+            <version>1.6.3 </version>
         </dependency>
 
-        <dependency>
-            <groupId>org.quartz-scheduler</groupId>
-            <artifactId>quartz</artifactId>
-            <version>2.2.2</version>
-        </dependency>
         <!-- spark hive 依赖 -->
         <dependency>
             <groupId>org.apache.spark</groupId>
             <artifactId>spark-hive_2.10</artifactId>
-            <version>1.6.0</version>
+            <version>1.6.3 </version>
             <exclusions>
                 <exclusion>
                     <groupId>commons-logging</groupId>
@@ -90,14 +85,19 @@
         <dependency>
             <groupId>org.apache.spark</groupId>
             <artifactId>spark-streaming-kafka_2.10</artifactId>
-            <version>1.6.0</version>
+            <version>1.6.3 </version>
         </dependency>
         <dependency>
             <groupId>org.apache.spark</groupId>
             <artifactId>spark-streaming_2.10</artifactId>
-            <version>1.6.0</version>
+            <version>1.6.3 </version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/org.apache.hive/hive-jdbc -->
+        <dependency>
+            <groupId>org.apache.hive</groupId>
+            <artifactId>hive-jdbc</artifactId>
+            <version>1.2.1000.2.6.0.3-8</version>
+        </dependency>
 
 
 
@@ -135,11 +135,17 @@
             <artifactId>mahout-spark_2.10</artifactId>
             <version>0.13.0</version>
         </dependency>
+        <!-- https://mvnrepository.com/artifact/org.apache.spark/spark-hive -->
+        <dependency>
+            <groupId>org.apache.hadoop</groupId>
+            <artifactId>hadoop-client</artifactId>
+            <version>2.7.3.2.6.0.3-8</version>
+        </dependency>
     </dependencies>
 
     <build>
-        <sourceDirectory>src/main/scala</sourceDirectory>
-        <testSourceDirectory>src/test/scala</testSourceDirectory>
+        <sourceDirectory>src/main/java</sourceDirectory>
+        <testSourceDirectory>src/test/java</testSourceDirectory>
         <plugins>
             <plugin>
                 <!-- see http://davidb.github.com/scala-maven-plugin -->

@@ -1,8 +1,10 @@
 package hdfs;
 
 
+import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.net.URI;
 
 import org.apache.commons.io.FileUtils;
@@ -61,13 +63,40 @@ public class HdfsDemo {
     //查看ls、创建目录mkdir、上传put、下载、删除del
     @Test
     public void ls() throws Exception {
-        Path path = new Path("/");
-        FileStatus[] status = fs.listStatus(path);
-        for(FileStatus s : status) {
-            System.out.println(s.getPath());
-            System.out.println(s.getAccessTime());
-            System.out.println(s.getLen());
-            System.out.println(s.getBlockSize());
+//        Path path = new Path("/");
+//        FileStatus[] status = fs.listStatus(path);
+//        for(FileStatus s : status) {
+//            System.out.println(s.getPath());
+//            System.out.println(s.getAccessTime());
+//            System.out.println(s.getLen());
+//            System.out.println(s.getBlockSize());
+//        }
+        String [] dirs = new String[]{"/TxFile/remote/prod/zhzc/UrgePayment/jiaxin/20180817",
+                "/TxFile/remote/prod/zhzc/UrgePayment/jiaxin/20180818",
+                "/TxFile/remote/prod/zhzc/UrgePayment/jiaxin/20180820",
+                "/TxFile/remote/prod/zhzc/UrgePayment/jiaxin/20180821",
+                "/TxFile/remote/prod/zhzc/UrgePayment/jiaxin/20180822",
+                "/TxFile/remote/prod/zhzc/UrgePayment/jiaxin/20180823",
+                "/TxFile/remote/prod/zhzc/UrgePayment/jiaxin/20180824",
+                "/TxFile/remote/prod/zhzc/UrgePayment/jiaxin/20180825",
+                "/TxFile/remote/prod/zhzc/UrgePayment/jiaxin/20180827",
+                "/TxFile/remote/prod/zhzc/UrgePayment/jiaxin/20180828"};
+        File file = new File("D:\\ksdler\\git_repository\\forfun\\hadoop\\src\\main\\out");
+
+        for(String dir:dirs){
+            System.out.println("--------------"+dir);
+            FileOutputStream out = new FileOutputStream(dir.substring(dir.lastIndexOf("/")+1));
+            BufferedOutputStream buffer = new BufferedOutputStream(out);
+            Path path = new Path(dir);
+            FileStatus[] status = fs.listStatus(path);
+            for(FileStatus s : status) {
+                String lujing =  s.getPath().toString();
+                lujing = lujing.substring(lujing.lastIndexOf("/")+1);
+                System.out.println(lujing);
+                out.write((lujing+"\n").getBytes());
+            }
+            buffer.close();
+            out.close();
         }
     }
 
