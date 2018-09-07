@@ -1,12 +1,9 @@
-package hive;
+package kylin;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-
+import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
+
+import java.sql.*;
 
 public class HiveClientTest {
 	private static String driverName = "org.apache.hive.jdbc.HiveDriver";
@@ -17,16 +14,14 @@ public class HiveClientTest {
     private static ResultSet res;
     private static String tableName="ods.t_gl_dict";
     private static final Logger log = Logger.getLogger(HiveClientTest.class);
- 
+
     public static void main(String[] args) {
             try {
                     Class.forName(driverName);
                     Connection conn = DriverManager.getConnection(url, user, password);
                     Statement stmt = conn.createStatement();
-
-                    sql = "select * from test88_spark2";
-//                    sql = "desc  " + tableName;
-                    System.out.println("Running:" + sql);
+                    sql = "select * from tx_test.test_k";
+                    System.out.println("Executing:" + sql);
                     res = stmt.executeQuery(sql);
                     System.out.println("执行“select * query”运行结果:");
                     while (res.next()) {

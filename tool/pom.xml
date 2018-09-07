@@ -36,6 +36,28 @@
         <artifactId>kylin-jdbc</artifactId>
         <version>2.3.2</version>
     </dependency>
+    <dependency>
+        <groupId>org.apache.hive</groupId>
+        <artifactId>hive-jdbc</artifactId>
+        <version>1.2.1000.2.6.0.3-8</version>
+    </dependency>
+    <dependency>
+        <groupId>org.apache.hive</groupId>
+        <artifactId>hive-service</artifactId>
+        <version>1.2.1000.2.6.0.3-8</version>
+    </dependency>
+    <dependency>
+        <groupId>org.apache.hive</groupId>
+        <artifactId>hive-exec</artifactId>
+        <version>1.2.1000.2.6.0.3-8</version>
+    </dependency>
+    <!-- https://mvnrepository.com/artifact/org.apache.httpcomponents/httpclient -->
+    <dependency>
+        <groupId>org.apache.httpcomponents</groupId>
+        <artifactId>httpclient</artifactId>
+        <version>4.5.2</version>
+    </dependency>
+
 </dependencies>
 
 </project>
