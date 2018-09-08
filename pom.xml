@@ -20,6 +20,7 @@
         <module>flink</module>
         <module>spark1</module>
         <module>ansj-solr</module>
+        <module>spark2</module>
     </modules>
 
     <name>forfun</name>
