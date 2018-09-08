@@ -3,7 +3,13 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-
+<!--
+ctrl alt b查看实现
+ctrl h
+ctrl alt h
+f12打开命令行
+alt ;显示当前类结构
+-->
     <groupId>mumudong</groupId>
     <artifactId>forfun</artifactId>
     <packaging>pom</packaging>

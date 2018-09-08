@@ -33,7 +33,7 @@
 
         <!--<dependency>-->
         <!--<groupId>io.grpc</groupId>-->
-        <!--<artifactId>grpc-netty</artifactId>-->
+        <!--<artifactId>gcom.nettyetty</artifactId>-->
         <!--<version>1.0.0</version>-->
         <!--</dependency>-->
         <!--<dependency>-->
