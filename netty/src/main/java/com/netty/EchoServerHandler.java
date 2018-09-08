@@ -1,4 +1,4 @@
-package netty;
+package com.netty;
 
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelFutureListener;

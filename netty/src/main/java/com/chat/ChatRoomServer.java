@@ -1,4 +1,4 @@
-package chat;
+package com.chat;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -114,7 +114,7 @@ public class ChatRoomServer {
                     } else {
                         users.add(name);
                         int num = OnlineNum(selector);
-                        String message = "welcome "+name+" to chat room! Online numbers:"+num;
+                        String message = "welcome "+name+" to com.chat room! Online numbers:"+num;
                         BroadCast(selector, null, message);
                     }
                 }

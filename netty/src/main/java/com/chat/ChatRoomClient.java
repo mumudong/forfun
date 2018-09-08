@@ -1,4 +1,4 @@
-package chat;
+package com.chat;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
