@@ -26,7 +26,7 @@ class SuperVisedActor extends Actor{
 }
 object Main{
     def main(args: Array[String]): Unit = {
-        val supervisingActor = system.actorOf(Props[SupervisingActor],"supervising-actor")
-        supervisingActor ! "failChild"
+//        val supervisingActor = system.actorOf(Props[SupervisingActor],"supervising-actor")
+//        supervisingActor ! "failChild"
     }
 }

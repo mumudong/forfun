@@ -11,14 +11,14 @@ import akka.actor.Actor
   *     !! 替换为 ?
   */
 case class Tom(name:String,actor:Actor)
-class ActorTest extends Actor{
-    def act(): Unit ={
-        while (true){
-            receive {
-                case Tom(name,actor) => println(name);actor.sender()!1
-            }
-        }
-    }
-
-    override def receive: Receive = ???
+class ActorTest {
+//    def act(): Unit ={
+//        while (true){
+//            receive {
+//                case Tom(name,actor) => println(name);actor.sender()!1
+//            }
+//        }
+//    }
+//
+//    override def receive: Receive = ???
 }
