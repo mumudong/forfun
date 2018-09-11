@@ -28,7 +28,7 @@ public class MysqlState implements State {
     @Override
     // sql异常仍然commit 不合常理....
     public void commit(Long txid) {
-        this._txid = 0l;
+        this._txid = txid;
         System.err.println("commit txid ------------------> " + txid);
     }
 
@@ -38,13 +38,14 @@ public class MysqlState implements State {
         int value = 0;
         int preValue = 0;
         long txid = 0l;
-        for(int i = 0;i < keys.size();i++){
+        for(int i = 0;i < keys.size();i++){// 一个批次里有两个a,第一次正常走，第二次会以为是opaque触发了
             bean = jdbcUtil.queryForMap("select * from stormtxx where key = ? ",keys.get((i)));
 //            if(keys.get(i).equals("z"))
 //                System.out.println(1/0);
             if(bean == null)
                 jdbcUtil.insert("insert into stormtxx(key,value,inserttime,txid,\"preValue\") values(?,?,NOW(),?,?)",keys.get(i),values.get(0),this._txid,0);
             else{ // 根据spout类型修改，此处使用opaque spout
+                System.out.println(bean + "  ,this._txid = " + this._txid);
                 if(bean.getTxid() != this._txid){
                     value = values.get(i) + bean.getValue();
                     preValue = bean.getValue();
@@ -84,7 +85,7 @@ class MysqlUpdater extends BaseStateUpdater<MysqlState>{
         for (TridentTuple t:tuples){
             System.out.println("tuple ---> " + t);
             keys.add(t.getString(0));
-            values.add(t.getInteger(1));
+            values.add(t.getLong(1).intValue());
         }
         state.updateBulk(keys,values);
     }

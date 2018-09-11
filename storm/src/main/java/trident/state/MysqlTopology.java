@@ -11,12 +11,17 @@ import org.apache.storm.trident.TridentTopology;
 import org.apache.storm.trident.operation.BaseFunction;
 import org.apache.storm.trident.operation.CombinerAggregator;
 import org.apache.storm.trident.operation.TridentCollector;
+import org.apache.storm.trident.operation.builtin.Sum;
 import org.apache.storm.trident.tuple.TridentTuple;
 import org.apache.storm.tuple.Fields;
 import org.apache.storm.tuple.Values;
 
 /**
- * Created by Administrator on 2018/6/29.
+ *  partitionpersist
+ *  测试可保证事务 ....
+ *     MysqlState implements State
+ *     MysqlUpdater extends BaseStateUpdater<MysqlState>
+ *     MysqlStateFactory implements StateFactory
  */
 public class MysqlTopology {
     public static void main(String[] args) {
@@ -39,7 +44,9 @@ public class MysqlTopology {
         TridentTopology topology = new TridentTopology();
         topology.newStream("MysqlStateTest",spout)
                 .each(new Fields("str"),new KeyValueFun(),new Fields("tel","times"))
-                .partitionPersist(new MysqlStateFactory(config),new Fields("tel","times"),new MysqlUpdater());
+                .groupBy(new Fields("tel"))
+                .aggregate(new Fields("times"),new Sum(),new Fields("count"))
+                .partitionPersist(new MysqlStateFactory(config),new Fields("tel","count"),new MysqlUpdater());
 
         LocalCluster cluster = new LocalCluster();
         Config conf = new Config();
