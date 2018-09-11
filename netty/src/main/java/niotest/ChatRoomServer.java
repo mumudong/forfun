@@ -1,4 +1,4 @@
-package com.chat;
+package niotest;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -42,28 +42,27 @@ public class ChatRoomServer {
         server.bind(new InetSocketAddress(port));
         //非阻塞的方式
         server.configureBlocking(false);
-        //注册到选择器上，设置为监听状态
+        //注册到选择器上，设置为监听状态，否则客户端连不上
         server.register(selector, SelectionKey.OP_ACCEPT);
-
         System.out.println("Server is listening now...");
 
         while(true) {
             int readyChannels = selector.select();
             System.out.println("readyChannels --> " + readyChannels);
             if(readyChannels == 0) continue;
-            Set selectedKeys = selector.selectedKeys();  //可以通过这个方法，知道可用通道的集合
+            Set selectedKeys = selector.selectedKeys();  //可以通过这个方法，知道可用通道的集合，返回非线程安全集合
             Iterator keyIterator = selectedKeys.iterator();
             while(keyIterator.hasNext()) {
+                System.out.println("keyIterator.hasNext()....");
                 SelectionKey sk = (SelectionKey) keyIterator.next();
-                keyIterator.remove();
+                keyIterator.remove();//此处一定要remove，否则select事件会一直触发
                 dealWithSelectionKey(server,sk);
             }
         }
     }
 
     public void dealWithSelectionKey(ServerSocketChannel server,SelectionKey sk) throws IOException {
-        if(sk.isAcceptable())//对应初始的key
-        {
+        if(sk.isAcceptable()){ //对应初始的key
             SocketChannel sc = server.accept();
             //非阻塞模式
             sc.configureBlocking(false);
@@ -75,42 +74,34 @@ public class ChatRoomServer {
             System.out.println("Server is listening from client :" + sc.getRemoteAddress());
             sc.write(charset.encode("Please input your name."));
         }
-        //处理来自客户端的数据读取请求
-        if(sk.isReadable())
-        {
+        //处理来自客户端的数据读取请求,连接断开也会触发
+        if(sk.isReadable()) {
+            System.out.println("服务器读事件.....");
             //返回该SelectionKey对应的 Channel，其中有数据需要读取
             SocketChannel sc = (SocketChannel)sk.channel();
             ByteBuffer buff = ByteBuffer.allocate(1024);
             StringBuilder content = new StringBuilder();
-            try
-            {
-                while(sc.read(buff) > 0)
-                {
+            try {
+                while(sc.read(buff) > 0) {
                     buff.flip();
                     content.append(charset.decode(buff));
-
                 }
                 System.out.println("Server is listening from client " + sc.getRemoteAddress() + " data rev is: " + content);
                 //将此对应的channel设置为准备下一次接受数据
 //                sk.interestOps(SelectionKey.OP_READ);
-            }
-            catch (IOException io)
-            {
+            } catch (IOException io){
                 sk.cancel();
-                if(sk.channel() != null)
-                {
+                if(sk.channel() != null) {
                     sk.channel().close();
                 }
             }
-            if(content.length() > 0)
-            {
+            if(content.length() > 0){
                 String[] arrayContent = content.toString().split(USER_CONTENT_SPILIT);
                 //注册用户
                 if(arrayContent != null && arrayContent.length ==1) {
                     String name = arrayContent[0];
                     if(users.contains(name)) {
                         sc.write(charset.encode(USER_EXIST));
-
                     } else {
                         users.add(name);
                         int num = OnlineNum(selector);
@@ -136,12 +127,10 @@ public class ChatRoomServer {
     //TODO 要是能检测下线，就不用这么统计了
     public static int OnlineNum(Selector selector) {
         int res = 0;
-        for(SelectionKey key : selector.keys())
-        {
+        for(SelectionKey key : selector.keys()) {
             Channel targetchannel = key.channel();
 
-            if(targetchannel instanceof SocketChannel)
-            {
+            if(targetchannel instanceof SocketChannel) {
                 res++;
             }
         }
@@ -150,20 +139,17 @@ public class ChatRoomServer {
 
     public void BroadCast(Selector selector, SocketChannel except, String content) throws IOException {
         //广播数据到所有的SocketChannel中
-        for(SelectionKey key : selector.keys())
-        {
+        for(SelectionKey key : selector.keys()) {
             Channel targetchannel = key.channel();
             //如果except不为空，不回发给发送此内容的客户端
-            if(targetchannel instanceof SocketChannel && targetchannel!=except)
-            {
+            if(targetchannel instanceof SocketChannel && targetchannel!=except) {
                 SocketChannel dest = (SocketChannel)targetchannel;
                 dest.write(charset.encode(content));
             }
         }
     }
 
-    public static void main(String[] args) throws IOException
-    {
+    public static void main(String[] args) throws IOException {
         new ChatRoomServer().init();
     }
 }

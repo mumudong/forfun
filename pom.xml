@@ -4,11 +4,34 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 <!--
-ctrl alt b查看实现
+ctrl alt b   查看实现
+f12          打开命令行
+alt ;        显示当前类结构
+ctrl q       显示注释文档
+Ctrl + shift + alt + n 查找类中方法或变量
+Ctrl+Shift+U 大小写转化
+
+【调试部分、编译】
+Ctrl+F2，停止
+Alt+Shift+F9，选择 Debug
+Alt+Shift+F10，选择 Run
+Ctrl+Shift+F9，编译
+Ctrl+Shift+F10，运行
+Ctrl+Shift+F8，查看断点
+F8，步过
+F7，步入
+Shift+F7，智能步入
+Shift+F8，步出
+Alt+Shift+F8，强制步过
+Alt+Shift+F7，强制步入
+Alt+F9，运行至光标处
+Ctrl+Alt+F9，强制运行至光标处
+F9，恢复程序
+Alt+F10，定位到断点
+Ctrl+F8，切换行断点
+
 ctrl h
 ctrl alt h
-f12打开命令行
-alt ;显示当前类结构
 -->
     <groupId>mumudong</groupId>
     <artifactId>forfun</artifactId>

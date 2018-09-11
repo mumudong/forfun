@@ -1,4 +1,4 @@
-package com.chat;
+package niotest;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -22,19 +22,17 @@ public class ChatRoomClient {
     private static String USER_EXIST = "system message: user exist, please change a name";
     private static String USER_CONTENT_SPILIT = "---->";
 
-    public void init() throws IOException
-    {
+    public void init() throws IOException {
         selector = Selector.open();
         //连接远程主机的IP和端口
         sc = SocketChannel.open(new InetSocketAddress("127.0.0.1",port));
         sc.configureBlocking(false);
-        sc.register(selector, SelectionKey.OP_READ);
+        sc.register(selector, SelectionKey.OP_READ);//若不注册，不能读取数据
         //开辟一个新线程来读取从服务器端的数据
         new Thread(new ClientThread()).start();
         //在主线程中 从键盘读取数据输入到服务器端
         Scanner scan = new Scanner(System.in);
-        while(scan.hasNextLine())
-        {
+        while(scan.hasNextLine()) {
             String line = scan.nextLine();
             if("".equals(line)) continue; //不允许发空消息
             if("".equals(name)) {
@@ -45,14 +43,10 @@ public class ChatRoomClient {
             }
             sc.write(charset.encode(line));//sc既能写也能读，这边是写
         }
-
     }
-    private class ClientThread implements Runnable
-    {
-        public void run()
-        {
-            try
-            {
+    private class ClientThread implements Runnable {
+        public void run() {
+            try {
                 while(true) {
                     int readyChannels = selector.select();
                     if(readyChannels == 0) continue;
@@ -70,16 +64,13 @@ public class ChatRoomClient {
         }
 
         private void dealWithSelectionKey(SelectionKey sk) throws IOException {
-            if(sk.isReadable())
-            {
+            if(sk.isReadable()) {
                 //使用 NIO 读取 Channel中的数据，这个和全局变量sc是一样的，因为只注册了一个SocketChannel
                 //sc既能写也能读，这边是读
                 SocketChannel sc = (SocketChannel)sk.channel();
-
                 ByteBuffer buff = ByteBuffer.allocate(1024);
                 String content = "";
-                while(sc.read(buff) > 0)
-                {
+                while(sc.read(buff) > 0) {
                     buff.flip();
                     content += charset.decode(buff);
                 }
@@ -88,15 +79,14 @@ public class ChatRoomClient {
                     name = "";
                 }
                 System.out.println(content);
-                sk.interestOps(SelectionKey.OP_READ);
+//                sk.interestOps(SelectionKey.OP_READ);
             }
         }
     }
 
 
 
-    public static void main(String[] args) throws IOException
-    {
+    public static void main(String[] args) throws IOException {
         new ChatRoomClient().init();
     }
 }
