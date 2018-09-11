@@ -4,6 +4,7 @@ import org.apache.storm.topology.FailedException;
 import org.apache.storm.trident.operation.BaseFunction;
 import org.apache.storm.trident.operation.TridentCollector;
 import org.apache.storm.trident.tuple.TridentTuple;
+import org.apache.storm.tuple.Values;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,6 +30,7 @@ public class WordFunction extends BaseFunction {
         if (value.charAt(0) > 'h' && value.charAt(0) < 'n') {
             throw new FailedException();
         }
+        collector.emit(new Values(tuple.getString(1),1));
     }
     private Logger logger = LoggerFactory.getLogger(getClass());
 }
