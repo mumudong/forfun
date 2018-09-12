@@ -34,6 +34,7 @@ public class Main {
     public static void main(String[] args) throws Exception{
         TridentKafkaConfig tconfig = new TridentKafkaConfig(new ZkHosts("hadoop-5:2181"),"stormtx","stormtx-spout");
         tconfig.scheme = new SchemeAsMultiScheme(new StringScheme());
+
         OpaqueTridentKafkaSpout spout = new OpaqueTridentKafkaSpout(tconfig);
 
         TridentHBaseMapper hBaseMapper = new SimpleTridentHBaseMapper()
@@ -56,6 +57,7 @@ public class Main {
         TridentTopology topology = new TridentTopology();
         topology.newStream("fixedSpout",spout)
                 .flatMap(new SplitFunction(),new Fields("word"))
+                .parallelismHint(16)
                 .window(durationWindow,new Fields("word"),new WordAggregator(),new Fields("wordcount"))
                 .each(new Fields("wordcount"),new TopNFunction(4),new Fields("rank","word","count"))
                 .partitionPersist(stateFactory,new Fields("rank","word","count"),new HBaseUpdater(),new Fields());
