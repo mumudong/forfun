@@ -16,19 +16,23 @@ import org.apache.storm.trident.testing.FixedBatchSpout;
 import org.apache.storm.trident.tuple.TridentTuple;
 import org.apache.storm.tuple.Fields;
 import org.apache.storm.tuple.Values;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.activation.FileDataSource;
 import javax.swing.tree.FixedHeightLayoutCache;
 
 /**
- * Created by Administrator on 2018/6/29.
+ *  测试可保证精准消费
+ *  JDBCState<T> implements IBackingMap<T>
+ *  Factory implements StateFactory
+ *  kafkaspout str字段
  */
 public class JDBCTopology {
     public static void main(String[] args) {
         // zookeeper管理状态需要修改配置文件 transactional.zookeeper.servers
-        TridentKafkaConfig tconfig = new TridentKafkaConfig(new ZkHosts("hadoop-5:2181"),"stormtx","stormtx-spout");
+        TridentKafkaConfig tconfig = new TridentKafkaConfig(new ZkHosts("hadoop-5:2181,hadoop-6:2181"),"stormtx","stormtx1");
         tconfig.scheme = new SchemeAsMultiScheme(new StringScheme());
-
         OpaqueTridentKafkaSpout spout = new OpaqueTridentKafkaSpout(tconfig);
 
         // state持久化配置
@@ -54,7 +58,7 @@ public class JDBCTopology {
         Config conf = new Config();
 //        conf.put("transactional.zookeeper.servers","hadoop-5");
 //        conf.put("transactional.zookeeper.port","2181");
-        cluster.submitTopology("Test",conf,topology.build());
+        cluster.submitTopology("test",conf,topology.build());
     }
 }
 class KeyValueFun extends BaseFunction{
@@ -68,10 +72,12 @@ class KeyValueFun extends BaseFunction{
 }
 // combinerAggregator 先在各自分区聚合，然后合并到一个分区再聚合
 // reducerAggregator 先合并同一批次各分区到一个分区，然后聚合
+// 所以使用aggregate时，combinerAggregator会有优势
+
 class SumCombineAgg implements CombinerAggregator<Long>{
+    private Logger logger = LoggerFactory.getLogger(getClass());
     @Override
     public Long init(TridentTuple tuple) {
-        System.err.println("init --> " + tuple);
         return Long.valueOf(tuple.getInteger(0));
     }
 

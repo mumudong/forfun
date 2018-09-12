@@ -8,17 +8,9 @@ public class Bean {
     private long sum;
     private long txid;
     private String time;
-
+    private long presum;
     public Bean() {
     }
-
-    public Bean(String tel, long sum, long txid, String time) {
-        this.tel = tel;
-        this.sum = sum;
-        this.txid = txid;
-        this.time = time;
-    }
-
     public String getTel() {
         return tel;
     }
@@ -51,6 +43,14 @@ public class Bean {
         this.time = time;
     }
 
+    public long getPresum() {
+        return presum;
+    }
+
+    public void setPresum(long presum) {
+        this.presum = presum;
+    }
+
     @Override
     public String toString() {
         return "Bean{" +
@@ -58,6 +58,7 @@ public class Bean {
                 ", sum=" + sum +
                 ", txid=" + txid +
                 ", time='" + time + '\'' +
+                ", presum=" + presum +
                 '}';
     }
 }

@@ -65,7 +65,11 @@ public class JDBCUtil {
             }
             rs = ps.executeQuery();
             if(rs.next()){
-                Bean iteBean=new Bean(rs.getString("tel"), rs.getLong("sum"), rs.getLong("txid"), null);
+                Bean iteBean=new Bean();
+                iteBean.setPresum(rs.getLong("presum"));
+                iteBean.setTel(rs.getString("tel"));
+                iteBean.setSum(rs.getLong("sum"));
+                iteBean.setTxid(rs.getLong("txid"));
                 result.put(rs.getString("tel"), iteBean);
             }
         } catch (SQLException e) {
