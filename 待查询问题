@@ -24,7 +24,7 @@ hbase RIT问题：
 
 https://blog.csdn.net/zhi_fu/article/details/77778675
 
-
+sqoop split-by $conditions -m同时使用并行执行
 
 
 
