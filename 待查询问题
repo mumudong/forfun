@@ -6,6 +6,21 @@ es分词器修改：
 
 es运维命令：
 
+hbase RIT region in transcation状态迁移：
+    regionServer启动后，本身会进行一次RIT操作，此时client服务会暂时关闭掉
+    Hmaster对region的open和close都向master插入一条记录，因master对region操作要保持原子性，region的open和close是通过
+    hmaster和region server协调完成，hmaster采用RIT机制并结合zookeeper中node状态保证操作的安全和一致性
+
+hbase RIT问题：
+    现象：不能访问，报RIT问题，pending_open...
+     bacancer无法运行
+    解决：方案1：hbase hbck -repair
+          方案2：强制删除，找到hdfs上该表所在位置，删除，找到zookeeper中该表的节点位置，删除 delete /hbase/table/tablename
+                  hbase hbck -repair
+    hbase重启：
+        balance_switch false 防止重启过程中分片迁移
+        graceful_stop.sh hadoop-7
+        graceful_stop.sh --restart hadoop-7
 
 
 
