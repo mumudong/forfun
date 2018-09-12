@@ -28,7 +28,7 @@ import org.apache.storm.tuple.Values;
 import java.util.HashMap;
 
 /**
- * Created by Administrator on 2018/7/3.
+ *  HbaseState
  */
 public class Main {
     public static void main(String[] args) throws Exception{

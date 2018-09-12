@@ -7,10 +7,12 @@ import org.apache.storm.trident.operation.TridentCollector;
 import org.apache.storm.trident.tuple.TridentTuple;
 import org.apache.storm.tuple.Values;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.*;
 
 /**
- * Created by Administrator on 2018/7/3.
+ * 窗口函数测试
  */
 public class WordAggregator extends BaseAggregator<HashMap<String,Long>>{
     @Override
@@ -48,6 +50,12 @@ class TopNFunction extends BaseFunction{
     public TopNFunction(int n){
         this.topN = n;
     }
+
+    /**
+     * 没有数据的时候此方法不会执行
+     * @param tuple
+     * @param collector
+     */
     @Override
     public void execute(TridentTuple tuple, TridentCollector collector) {
         HashMap<String,Long> hashMap = (HashMap<String,Long>) tuple.get(0);
@@ -66,6 +74,6 @@ class TopNFunction extends BaseFunction{
             System.out.println("Sending: " + i + " " + list.get(j).getKey() + ":" + list.get(j).getValue());
             i++;
         }
-        System.out.println("----------------done-------------------");
+        System.out.println("----------------done-------------------" + LocalDateTime.now());
     }
 }
