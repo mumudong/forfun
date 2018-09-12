@@ -22,7 +22,7 @@ hbase RIT问题：
         graceful_stop.sh hadoop-7
         graceful_stop.sh --restart hadoop-7
 
-
+https://blog.csdn.net/zhi_fu/article/details/77778675
 
 
 
