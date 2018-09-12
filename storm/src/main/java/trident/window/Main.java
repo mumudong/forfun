@@ -63,6 +63,8 @@ public class Main {
                 .partitionPersist(stateFactory,new Fields("rank","word","count"),new HBaseUpdater(),new Fields());
 
         Config conf = new Config();
+        conf.setNumWorkers(2);
+        conf.setMaxSpoutPending(100);
         conf.put("hbase",new HashMap<String,Object>());
         if(args.length == 0){
             LocalCluster cluster = new LocalCluster();
