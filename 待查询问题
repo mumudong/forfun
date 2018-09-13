@@ -2,6 +2,46 @@ hive如何判断数据倾斜：
    https://blog.csdn.net/u012151684/article/details/77074356
 hive面试题：
    https://www.cnblogs.com/qingyunzong/p/8747656.html
+   行转列
+       SELECT
+         uid,
+         kv['c1'] AS c1,
+         kv['c2'] AS c2,
+         kv['c3'] AS c3
+       FROM (
+         SELECT uid, to_map(key, value) kv
+         FROM vtable
+         GROUP BY uid
+       ) t
+            或者
+       select sid,
+       max(case course when "shuxue" then score else 0 end)  as shuxue,
+       max(case course when "yuwen" then score else 0 end ) as yuwen
+       from course group by sid;
+
+
+
+   列转行
+       SELECT t1.uid, t2.key, t2.value
+       FROM htable t1
+       LATERAL VIEW explode (map(
+         'c1', c1,
+         'c2', c2,
+         'c3', c3
+       )) t2 as key, value
+
+
+
+
+
+
+
+
+
+
+
+
+
 es分词器修改：
 
 es运维命令：
