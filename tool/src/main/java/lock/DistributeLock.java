@@ -50,7 +50,7 @@ public class DistributeLock {
             }
         };
         // 10个线程使用同一把锁
-        for (int i = 0; i < 10; i++) {
+        for (int i = 0; i < 4; i++) {
             Thread t = new Thread(runnable);
             t.start();
         }
