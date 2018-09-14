@@ -5,7 +5,8 @@ import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.CuratorFrameworkFactory;
 import org.apache.curator.framework.recipes.locks.InterProcessMutex;
 import org.apache.curator.retry.ExponentialBackoffRetry;
-import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Created by Administrator on 2018/6/15.
@@ -31,11 +32,16 @@ public class DistributeLock {
         Runnable runnable = new Runnable() {
             public void run() {
                 DistributeLockZK lock = null;
+                Logger logger = LoggerFactory.getLogger(getClass());
                 try {
-                    lock = new DistributeLockZK("hadoop-5:2181", "test1");
+                    lock = new DistributeLockZK("hadoop-5:2181,hadoop-6:2181,hadoop-7:2181", "test1");
+                    try {
+                        Thread.sleep(2000l);//zookeeper建立连接比较慢，线程睡一会儿等等它
+                    } catch (InterruptedException e) {
+                    }
                     lock.lock();
-                    System.out.println(--n);
-                    System.out.println(Thread.currentThread().getName() + "正在运行");
+                    logger.error(--n + "");
+                    logger.error(Thread.currentThread().getName() + "正在运行");
                 } finally {
                     if (lock != null) {
                         lock.unlock();
@@ -43,7 +49,7 @@ public class DistributeLock {
                 }
             }
         };
-
+        // 10个线程使用同一把锁
         for (int i = 0; i < 10; i++) {
             Thread t = new Thread(runnable);
             t.start();
