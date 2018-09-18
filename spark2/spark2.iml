@@ -11,28 +11,6 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="library" name="Maven: org.mortbay.jetty:jetty-sslengine:6.1.26.hwx" level="project" />
-    <orderEntry type="library" name="Maven: com.microsoft.azure:azure-storage:4.2.0" level="project" />
-    <orderEntry type="library" name="Maven: com.microsoft.azure:azure-keyvault-core:0.8.0" level="project" />
-    <orderEntry type="library" name="Maven: org.apache.hadoop:hadoop-auth:2.7.3.2.6.0.3-8" level="project" />
-    <orderEntry type="library" name="Maven: com.nimbusds:nimbus-jose-jwt:3.9" level="project" />
-    <orderEntry type="library" name="Maven: net.jcip:jcip-annotations:1.0" level="project" />
-    <orderEntry type="library" name="Maven: net.minidev:json-smart:1.1.1" level="project" />
-    <orderEntry type="library" name="Maven: com.squareup.okhttp:okhttp:2.4.0" level="project" />
-    <orderEntry type="library" name="Maven: com.squareup.okio:okio:1.4.0" level="project" />
-    <orderEntry type="library" name="Maven: org.mortbay.jetty:jetty-util:6.1.26.hwx" level="project" />
-    <orderEntry type="library" name="Maven: org.apache.hadoop:hadoop-mapreduce-client-app:2.7.3.2.6.0.3-8" level="project" />
-    <orderEntry type="library" name="Maven: org.apache.hadoop:hadoop-mapreduce-client-common:2.7.3.2.6.0.3-8" level="project" />
-    <orderEntry type="library" name="Maven: org.apache.hadoop:hadoop-yarn-client:2.7.3.2.6.0.3-8" level="project" />
-    <orderEntry type="library" name="Maven: org.apache.hadoop:hadoop-yarn-server-common:2.7.3.2.6.0.3-8" level="project" />
-    <orderEntry type="library" name="Maven: org.apache.hadoop:hadoop-yarn-registry:2.7.3.2.6.0.3-8" level="project" />
-    <orderEntry type="library" name="Maven: org.apache.hadoop:hadoop-mapreduce-client-shuffle:2.7.3.2.6.0.3-8" level="project" />
-    <orderEntry type="library" name="Maven: org.apache.hadoop:hadoop-yarn-api:2.7.3.2.6.0.3-8" level="project" />
-    <orderEntry type="library" name="Maven: org.apache.hadoop:hadoop-mapreduce-client-core:2.7.3.2.6.0.3-8" level="project" />
-    <orderEntry type="library" name="Maven: org.apache.hadoop:hadoop-yarn-common:2.7.3.2.6.0.3-8" level="project" />
-    <orderEntry type="library" name="Maven: org.apache.hadoop:hadoop-mapreduce-client-jobclient:2.7.3.2.6.0.3-8" level="project" />
-    <orderEntry type="library" name="Maven: org.apache.hadoop:hadoop-annotations:2.7.3.2.6.0.3-8" level="project" />
-    <orderEntry type="library" name="scala-sdk-2.11.8" level="application" />
     <orderEntry type="library" name="Maven: junit:junit:4.11" level="project" />
     <orderEntry type="library" name="Maven: org.hamcrest:hamcrest-core:1.3" level="project" />
     <orderEntry type="library" name="Maven: org.postgresql:postgresql:9.4.1207.jre7" level="project" />
@@ -196,25 +174,13 @@
     <orderEntry type="library" name="Maven: com.chuusai:shapeless_2.11:2.3.2" level="project" />
     <orderEntry type="library" name="Maven: org.typelevel:macro-compat_2.11:1.1.1" level="project" />
     <orderEntry type="library" name="Maven: org.apache.hive:hive-jdbc:1.2.1000.2.6.0.3-8" level="project" />
-    <orderEntry type="library" name="Maven: org.apache.hadoop:hadoop-client:2.7.3.2.6.0.3-8" level="project" />
     <orderEntry type="library" name="Maven: org.apache.hive:hive-service:1.2.1000.2.6.0.3-8" level="project" />
-    <orderEntry type="library" name="Maven: com.typesafe.akka:akka-actor_2.11:2.5.4" level="project" />
-    <orderEntry type="library" name="Maven: com.typesafe:config:1.3.1" level="project" />
-    <orderEntry type="library" name="Maven: org.scala-lang.modules:scala-java8-compat_2.11:0.7.0" level="project" />
-    <orderEntry type="library" name="Maven: com.typesafe.akka:akka-remote_2.11:2.5.4" level="project" />
-    <orderEntry type="library" name="Maven: com.typesafe.akka:akka-stream_2.11:2.5.4" level="project" />
-    <orderEntry type="library" name="Maven: org.reactivestreams:reactive-streams:1.0.1" level="project" />
-    <orderEntry type="library" name="Maven: com.typesafe:ssl-config-core_2.11:0.2.1" level="project" />
-    <orderEntry type="library" name="Maven: com.typesafe.akka:akka-protobuf_2.11:2.5.4" level="project" />
-    <orderEntry type="library" name="Maven: io.aeron:aeron-driver:1.2.5" level="project" />
-    <orderEntry type="library" name="Maven: io.aeron:aeron-client:1.2.5" level="project" />
-    <orderEntry type="library" name="Maven: org.agrona:agrona:0.9.5" level="project" />
     <orderEntry type="library" name="Maven: org.apache.hadoop:hadoop-common:2.7.3" level="project" />
     <orderEntry type="library" name="Maven: org.apache.hadoop:hadoop-annotations:2.7.3" level="project" />
     <orderEntry type="module-library">
       <library name="Maven: jdk.tools:jdk.tools:1.8">
         <CLASSES>
-          <root url="jar://E:/install/Java/jdk1.8.0_144/lib/tools.jar!/" />
+          <root url="jar://C:/Program Files/Java/jdk1.8.0_161/lib/tools.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />
@@ -234,7 +200,6 @@
     <orderEntry type="library" name="Maven: com.sun.xml.bind:jaxb-impl:2.2.3-1" level="project" />
     <orderEntry type="library" name="Maven: javax.xml.bind:jaxb-api:2.2.2" level="project" />
     <orderEntry type="library" name="Maven: javax.xml.stream:stax-api:1.0-2" level="project" />
-    <orderEntry type="library" name="Maven: org.codehaus.jackson:jackson-jaxrs:1.8.3" level="project" />
     <orderEntry type="library" name="Maven: org.codehaus.jackson:jackson-xc:1.8.3" level="project" />
     <orderEntry type="library" name="Maven: com.sun.jersey:jersey-server:1.9" level="project" />
     <orderEntry type="library" name="Maven: asm:asm:3.1" level="project" />
@@ -257,6 +222,44 @@
     <orderEntry type="library" name="Maven: org.apache.zookeeper:zookeeper:3.4.6" level="project" />
     <orderEntry type="library" name="Maven: org.apache.commons:commons-compress:1.4.1" level="project" />
     <orderEntry type="library" name="Maven: org.tukaani:xz:1.0" level="project" />
+    <orderEntry type="library" name="Maven: org.apache.hadoop:hadoop-client:2.7.3" level="project" />
+    <orderEntry type="library" name="Maven: org.apache.hadoop:hadoop-hdfs:2.7.3" level="project" />
+    <orderEntry type="library" name="Maven: xerces:xercesImpl:2.9.1" level="project" />
+    <orderEntry type="library" name="Maven: xml-apis:xml-apis:1.3.04" level="project" />
+    <orderEntry type="library" name="Maven: org.apache.hadoop:hadoop-mapreduce-client-app:2.7.3" level="project" />
+    <orderEntry type="library" name="Maven: org.apache.hadoop:hadoop-mapreduce-client-common:2.7.3" level="project" />
+    <orderEntry type="library" name="Maven: org.apache.hadoop:hadoop-yarn-client:2.7.3" level="project" />
+    <orderEntry type="library" name="Maven: org.apache.hadoop:hadoop-yarn-server-common:2.7.3" level="project" />
+    <orderEntry type="library" name="Maven: org.apache.hadoop:hadoop-mapreduce-client-shuffle:2.7.3" level="project" />
+    <orderEntry type="library" name="Maven: org.apache.hadoop:hadoop-yarn-api:2.7.3" level="project" />
+    <orderEntry type="library" name="Maven: org.apache.hadoop:hadoop-mapreduce-client-core:2.7.3" level="project" />
+    <orderEntry type="library" name="Maven: org.apache.hadoop:hadoop-yarn-common:2.7.3" level="project" />
+    <orderEntry type="library" name="Maven: com.sun.jersey:jersey-client:1.9" level="project" />
+    <orderEntry type="library" name="Maven: org.apache.hadoop:hadoop-mapreduce-client-jobclient:2.7.3" level="project" />
+    <orderEntry type="library" name="Maven: org.apache.hbase:hbase-client:1.1.2" level="project" />
+    <orderEntry type="library" name="Maven: org.apache.hbase:hbase-annotations:1.1.2" level="project" />
+    <orderEntry type="library" name="Maven: org.apache.hbase:hbase-common:1.1.2" level="project" />
+    <orderEntry type="library" name="Maven: org.apache.hbase:hbase-protocol:1.1.2" level="project" />
+    <orderEntry type="library" name="Maven: org.jruby.jcodings:jcodings:1.0.8" level="project" />
+    <orderEntry type="library" name="Maven: org.jruby.joni:joni:2.1.2" level="project" />
+    <orderEntry type="library" name="Maven: com.github.stephenc.findbugs:findbugs-annotations:1.3.9-1" level="project" />
+    <orderEntry type="library" name="Maven: org.apache.hbase:hbase-server:1.1.2" level="project" />
+    <orderEntry type="library" name="Maven: org.apache.hbase:hbase-procedure:1.1.2" level="project" />
+    <orderEntry type="library" name="Maven: org.apache.hbase:hbase-common:tests:1.1.2" level="project" />
+    <orderEntry type="library" scope="RUNTIME" name="Maven: org.apache.hbase:hbase-prefix-tree:1.1.2" level="project" />
+    <orderEntry type="library" name="Maven: org.apache.hbase:hbase-hadoop-compat:1.1.2" level="project" />
+    <orderEntry type="library" name="Maven: org.apache.hbase:hbase-hadoop2-compat:1.1.2" level="project" />
+    <orderEntry type="library" name="Maven: com.yammer.metrics:metrics-core:2.2.0" level="project" />
+    <orderEntry type="library" name="Maven: org.apache.commons:commons-math:2.2" level="project" />
+    <orderEntry type="library" name="Maven: org.mortbay.jetty:jetty-sslengine:6.1.26" level="project" />
+    <orderEntry type="library" name="Maven: org.mortbay.jetty:jsp-2.1:6.1.14" level="project" />
+    <orderEntry type="library" name="Maven: org.mortbay.jetty:jsp-api-2.1:6.1.14" level="project" />
+    <orderEntry type="library" name="Maven: org.codehaus.jackson:jackson-jaxrs:1.9.13" level="project" />
+    <orderEntry type="library" name="Maven: tomcat:jasper-compiler:5.5.23" level="project" />
+    <orderEntry type="library" scope="RUNTIME" name="Maven: tomcat:jasper-runtime:5.5.23" level="project" />
+    <orderEntry type="library" scope="RUNTIME" name="Maven: commons-el:commons-el:1.0" level="project" />
+    <orderEntry type="library" name="Maven: org.jamon:jamon-runtime:2.3.1" level="project" />
+    <orderEntry type="library" name="Maven: com.lmax:disruptor:3.3.0" level="project" />
     <orderEntry type="library" name="Maven: log4j:log4j:1.2.17" level="project" />
     <orderEntry type="library" name="Maven: com.alibaba:fastjson:1.2.35" level="project" />
     <orderEntry type="library" name="Maven: commons-io:commons-io:2.4" level="project" />
