@@ -1,3 +1,5 @@
+http://www.importnew.com/29813.html
+
 hive如何判断数据倾斜：
    https://blog.csdn.net/u012151684/article/details/77074356
    个别reduce运行缓慢
@@ -68,7 +70,8 @@ https://blog.csdn.net/zhi_fu/article/details/77778675
 
 sqoop split-by $conditions -m同时使用并行执行
 
-
+nlp数据集
+https://blog.csdn.net/tMb8Z9Vdm66wH68VX1/article/details/78153519
 
 
 
