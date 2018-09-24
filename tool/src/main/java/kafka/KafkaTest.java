@@ -15,7 +15,7 @@ import org.apache.kafka.clients.producer.ProducerRecord;
 
 public class KafkaTest {
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception{
         Properties props = new Properties();
         KafkaProducer<String, String> producer = null;
         props.put("bootstrap.servers", "10.167.222.105:6667,10.167.222.106:6667,10.167.222.107:6667");
@@ -27,15 +27,16 @@ public class KafkaTest {
         props.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer");
         props.put("value.serializer", "org.apache.kafka.common.serialization.StringSerializer");
         producer = new KafkaProducer<String, String>(props);
-        for(int i = 0; i< 20;i++){
-            produce(producer,"test......" + i);
+        for(int i = 0; i< 10;i++){
+            produce(producer,"a f y y z z a f f e e e h h h h e e y y f f f f");
+            Thread.sleep(2000l);
         }
         close(producer);
 //        System.out.println(Long.MAX_VALUE + 1);
 //        System.out.println(Long.MAX_VALUE );
     }
     public static void produce(KafkaProducer producer,String str){
-        producer.send(new ProducerRecord<String, String>("test", str));
+        producer.send(new ProducerRecord<String, String>("stormtx", str));
     }
     public static void close(KafkaProducer producer){
         producer.close();
