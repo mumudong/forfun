@@ -1,0 +1,41 @@
+1 拷贝phoenix-version-client包至squirrel下
+2 修改包中hbase-default.xml  zookeeper.znode.parent为/hbase-unsecure
+3 连接squirrel
+    jdbc:phoenix:hadoop-5:2181,hadoop-6:2181,hadoop-7:2181
+    org.apache.phoenix.jdbc.PhoenixDriver
+4 phoenix建表
+建新表并制定分区
+CREATE TABLE IF NOT EXISTS test4 (pk BIGINT PRIMARY KEY,ff1 DOUBLE,ff2 DOUBLE,sf1 VARCHAR,if1 INTEGER,if2 INTEGER,if3 INTEGER,if4 INTEGER,if5 INTEGER,if6 INTEGER) SALT_BUCKETS=40;
+CREATE INDEX ind_l4 ON test4(pk) SALT_BUCKETS=20;
+CREATE INDEX ind_l4_1 ON test4(ff1,ff2,sf1) SALT_BUCKETS=20;
+CREATE INDEX ind_l4_2 ON test4(if1) SALT_BUCKETS=20;
+
+覆盖索引
+(创建基于USERID的覆盖索引并绑定KEYWORD列上的数据)
+CREATE INDEX COVERINDEX ON CSVTANLES(USERID) INCLUDE(KEYWORD)
+当你要通过UERID来查询KEYWORD时就直接可以从索引上取回数据而无需先得到索引再去数据表中查询数据
+查询语句：
+SECECT KEYWORD FROM CSVTABLES WHERE USERID='9bb8b2af925864bb275b840c578df3c3'
+
+全局索引，更改操作会重写索引，严重影响性能，适合读多写少操作
+<property>
+   <name>hbase.regionserver.wal.codec</name>
+   <value>org.apache.hadoop.hbase.regionserver.wal.IndexedWALEditCodec</value>
+</property>
+
+映射hbase已有表
+create table "LCT_TEST"("ROW" varchar primary key, "columnfamily"."column1" varchar , "columnfamily"."column1" varchar);
+查看索引状态
+select TABLE_NAME,DATA_TABLE_NAME,INDEX_TYPE,INDEX_STATE,INDEX_DISABLE_TIMESTAMPfrom system.catalog where INDEX_TYPE is not null;
+
+
+drop table txfile_file;
+CREATE TABLE IF NOT EXISTS txfile_file (
+     fileName VARCHAR primary key  ,
+     date VARCHAR NULL,
+     type VARCHAR  NULL
+) SALT_BUCKETS = 20;
+
+CREATE INDEX txfile_file_covindex ON txfile_file(date,type) INCLUDE(fileName);
+CREATE INDEX txfile_file_covindex2 ON txfile_file(date);
+CREATE INDEX txfile_file_covindex3 ON txfile_file(type);
