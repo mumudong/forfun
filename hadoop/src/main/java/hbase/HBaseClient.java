@@ -1,66 +1,56 @@
 package hbase;
 
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.hbase.*;
+import org.apache.hadoop.hbase.Cell;
+import org.apache.hadoop.hbase.CellUtil;
+import org.apache.hadoop.hbase.HBaseConfiguration;
+import org.apache.hadoop.hbase.TableName;
 import org.apache.hadoop.hbase.client.*;
 import org.apache.hadoop.hbase.util.Bytes;
-import org.apache.hadoop.security.UserGroupInformation;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 
 public class HBaseClient {
-    static Configuration conf;
-    static {
-        System. setProperty("java.security.krb5.conf", "C:\\Users\\Administrator\\Downloads\\krb5.conf" );
-        conf = HBaseConfiguration.create();
-        UserGroupInformation.setConfiguration(conf);
-        try {
-            UserGroupInformation.loginUserFromKeytab("hbase", "C:\\Users\\Administrator\\Downloads\\hbase.keytab");
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        System.out.println(conf.get("hbase.zookeeper.quorum"));
+
+    Logger logger = LoggerFactory.getLogger(getClass());
+    Connection connection;
+    @Before
+    public void init() throws Exception{
+        Configuration conf = HBaseConfiguration.create();
+        conf.set("hbase.zookeeper.property.clientPort", "2181");
+        conf.set("hbase.zookeeper.quorum", "hdp-5,hdp-6,hdp-7");
+        connection = ConnectionFactory.createConnection(conf);
     }
-    public static HTableInterface getTable(String name) throws Exception {
-
-        HConnection connection = HConnectionManager.createConnection(conf);
-        HTableInterface result = connection.getTable(name);
-        return result;
+    @After
+    public void close() throws Exception{
+        connection.close();
     }
-
-    public static void createTable(String tablename) throws Exception{
-
-        HBaseAdmin admin = new HBaseAdmin(conf);
-        if(admin.tableExists(tablename)){
-            admin.disableTable(tablename);
-            admin.deleteTable(tablename);
+    @Test
+    public  void createTable() throws Exception{
+        String tablename = "txfile_file";
+        TableName table = TableName.valueOf(tablename);
+        Admin admin = connection.getAdmin();
+        if(admin.tableExists(table)){
+            admin.disableTable(table);
+            admin.deleteTable(table);
             System.out.println("删除旧表！");
         }
         System.out.println("新的表正在创建中！！！");
-        HTableDescriptor tableDescriptor = new HTableDescriptor(tablename);
-        tableDescriptor.addFamily(new HColumnDescriptor("info"));
-        admin.createTable(tableDescriptor);
-
-        Put put = new Put("123".getBytes());
-        put.add("info".getBytes(), "colum1".getBytes(), "value1".getBytes()) ;
-        put.add("info".getBytes(), "colum2".getBytes(), "value2".getBytes()) ;
-        put.add("info".getBytes(), "colum3".getBytes(), "value3".getBytes()) ;
-
-        Put put2 = new Put("234".getBytes()) ;
-        put2.add("info".getBytes(), "colum1".getBytes(), "value1".getBytes()) ;
-        put2.add("info".getBytes(), "colum2".getBytes(), "value2".getBytes()) ;
-        put2.add("info".getBytes(), "colum3".getBytes(), "value3".getBytes()) ;
-
-        HTable table = new HTable(conf, tablename);
-        table.put(put);
-        table.put(put2);
+//        HTableDescriptor tableDescriptor = new HTableDescriptor(table);
+//        tableDescriptor.addFamily(new HColumnDescriptor("info"));
+//        admin.createTable(tableDescriptor);
     }
     /**
      * get data from hbase table
      * @param table
      * @throws IOException
      */
-    public static void getData(HTableInterface table) throws IOException {
+    public static void getData(Table table) throws IOException {
         Get get = new Get(Bytes.toBytes("10001"));
         get.addFamily(Bytes.toBytes("info"));
         Result result = table.get(get);
@@ -78,10 +68,11 @@ public class HBaseClient {
 
     /**
      * insert data into hbase table
-     * @param table
      * @throws Exception
      */
-    public static void putData(HTableInterface table) throws Exception {
+    @Test
+    public   void putData() throws Exception {
+        Table table = connection.getTable(TableName.valueOf("txfile_file"));
         Put put = new Put(Bytes.toBytes("10001"));
         put.add(Bytes.toBytes("info"),
                 Bytes.toBytes("sex"),
@@ -95,11 +86,11 @@ public class HBaseClient {
 
     /**
      * delete data from hbase table
-     *
-     * @param table
      * @throws Exception
      */
-    public static void delData(HTableInterface table) throws Exception {
+    @Test
+    public   void delData() throws Exception {
+        Table table = connection.getTable(TableName.valueOf("txfile_file"));
         Delete del = new Delete(Bytes.toBytes("10001"));
         del.deleteColumn(Bytes.toBytes("info"),
                 Bytes.toBytes("sex"));
@@ -196,19 +187,4 @@ public class HBaseClient {
         }
     }
 
-    public static void main(String[] args) throws Exception {
-        System.out.println("createTable case...");
-        createTable("student");
-        HTableInterface tbStudent = HBaseClient.getTable("student");
-        System.out.println("getData case...");
-        getData(tbStudent);
-        System.out.println("putData case...");
-        putData(tbStudent);
-//        System.out.println("delData case...");
-//        delData(tbStudent);
-//        System.out.println("scanData case...");
-//        scanData(tbStudent);
-//        System.out.println("rangeScan case...");
-//        rangeScan(tbStudent);
-    }
 }
