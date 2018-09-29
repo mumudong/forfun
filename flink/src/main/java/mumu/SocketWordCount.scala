@@ -10,7 +10,7 @@ import org.apache.flink.streaming.api.windowing.time.Time
 case class WordWithCount(word:String,count:Long)
 object SocketWordCount {
     def main(args: Array[String]): Unit = {
-        val port : Int = 11199 //ParameterTool.fromArgs(args).getInt("port")
+        val port : Int = ParameterTool.fromArgs(args).getInt("port")
         val env : StreamExecutionEnvironment = StreamExecutionEnvironment.getExecutionEnvironment
         val text : DataStream[String] = env.socketTextStream("hadoop-7",port,'\n')
         //解析数据，分组，窗口化，并且聚合求sum
