@@ -1,5 +1,8 @@
 package multi_thread;
 
+/**
+ *
+ */
 public class LambdaThread {
     public static void main(String[] args) {
         new Thread(()->{
