@@ -1,4 +1,4 @@
-package future;
+package multi_thread.future;
 
 import java.util.ArrayList;
 import java.util.Iterator;
