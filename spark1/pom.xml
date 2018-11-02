@@ -11,6 +11,21 @@
 
     <artifactId>spark1</artifactId>
 
+    <repositories>
+    <repository>
+        <!-- Maven 自带的中央仓库使用的Id为central 如果其他的仓库声明也是用该Id就会覆盖中央仓库的配置 -->
+        <id>mvnrepository</id>
+        <name>mvnrepository</name>
+        <url>http://repo.hortonworks.com/content/repositories/releases/</url>
+        <layout>default</layout>
+        <releases>
+            <enabled>true</enabled>
+        </releases>
+        <snapshots>
+            <enabled>false</enabled>
+        </snapshots>
+    </repository>
+    </repositories>
     <properties>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
@@ -22,6 +37,11 @@
     </properties>
 
     <dependencies>
+        <dependency>
+            <groupId>org.scala-lang</groupId>
+            <artifactId>scala-library</artifactId>
+            <version>${scala.version}</version>
+        </dependency>
         <dependency>
             <groupId>org.apache.spark</groupId>
             <artifactId>spark-mllib_2.10</artifactId>

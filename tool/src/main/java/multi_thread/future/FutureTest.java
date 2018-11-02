@@ -1,4 +1,4 @@
-package future;
+package multi_thread.future;
 
 import java.util.Random;
 import java.util.concurrent.Callable;
