@@ -50,6 +50,7 @@ public class ConditionDemo {
                     }
                 }
                 finally{
+                    System.out.println("A lock unlock() ...");
                     lock.unlock();
                 }
             }
@@ -86,6 +87,7 @@ public class ConditionDemo {
                     }
                 }
                 finally{
+                    System.out.println("B lock unlock() ...");
                     lock.unlock();
                 }
             }
