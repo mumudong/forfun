@@ -29,3 +29,45 @@ Ctrl+F8，切换行断点
 
 ctrl h
 ctrl alt h
+
+
+clouderal pom配置
+pom添加：
+<repositories>
+	<repository>
+		<id>cloudera</id>
+		<url>https://repository.cloudera.com/artifactory/cloudera-repos/</url>
+		<releases>
+			<enabled>true</enabled>
+		</releases>
+		<snapshots>
+			<enabled>true</enabled>
+		</snapshots>
+	</repository>
+</repositories>
+修改maven settings.xml
+*,!cloudera表示出了aliyun还可以使用cloudera
+<mirror>
+	<id>nexus-aliyun</id>
+	<mirrorOf>*,!cloudera</mirrorOf>
+	<name>Nexus aliyun</name>                     
+	<url>
+	  http://maven.aliyun.com/nexus/content/groups/public
+	</url>
+</mirror> 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
