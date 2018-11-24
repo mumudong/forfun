@@ -7,6 +7,8 @@ bulkload注意事项：
         hbase.hregion.max.filesize
 	hbase.mapreduce.bulkload.max.hfiles.perRegion.perFamily
    bulkload数据量限制为上述两个参数的乘积
+http://hbase.apache.org/book.html#arch.bulk.load
+http://www.cloudera.com/documentation/enterprise/5-3-x/topics/admin_hbase_import.html
 
 ctrl alt b   查看实现
 f12          打开命令行
