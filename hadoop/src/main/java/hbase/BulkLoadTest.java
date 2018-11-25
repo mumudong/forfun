@@ -24,6 +24,7 @@ import java.io.IOException;
 /**
  * Created by Administrator on 2018/3/29.
  */
+@SuppressWarnings("all")
 public class BulkLoadTest {
    static class BulkLoadMap extends Mapper<LongWritable,Text,ImmutableBytesWritable,Put>{
        @Override
