@@ -1,6 +1,19 @@
 clickhouse   https://blog.csdn.net/china_world/article/details/52687685?locationNum=1
              https://blog.csdn.net/u013676711/article/details/78862243
 
+第一步：通过MR生成hbase对应HFile文件
+第二步：hadoop distcp跨集群拷贝
+第三步：bulkload
+
+bulkload注意事项：
+    mapreduce方式生成hfile则reducer数量和hbase表预分区数据量一样
+    bulkload每个region默认限制Hfile数量小于32个
+        hbase.hregion.max.filesize
+	hbase.mapreduce.bulkload.max.hfiles.perRegion.perFamily
+   bulkload数据量限制为上述两个参数的乘积
+http://hbase.apache.org/book.html#arch.bulk.load
+http://www.cloudera.com/documentation/enterprise/5-3-x/topics/admin_hbase_import.html
+
 ctrl alt b   查看实现
 f12          打开命令行
 alt ;        显示当前类结构
@@ -29,3 +42,45 @@ Ctrl+F8，切换行断点
 
 ctrl h
 ctrl alt h
+
+
+clouderal pom配置
+pom添加：
+<repositories>
+	<repository>
+		<id>cloudera</id>
+		<url>https://repository.cloudera.com/artifactory/cloudera-repos/</url>
+		<releases>
+			<enabled>true</enabled>
+		</releases>
+		<snapshots>
+			<enabled>true</enabled>
+		</snapshots>
+	</repository>
+</repositories>
+修改maven settings.xml
+*,!cloudera表示出了aliyun还可以使用cloudera
+<mirror>
+	<id>nexus-aliyun</id>
+	<mirrorOf>*,!cloudera</mirrorOf>
+	<name>Nexus aliyun</name>                     
+	<url>
+	  http://maven.aliyun.com/nexus/content/groups/public
+	</url>
+</mirror> 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
