@@ -1,5 +1,6 @@
 http://www.importnew.com/29813.html
-
+//下载源码依赖
+mvn dependency:resolve -Dclassifier=sources
 hive如何判断数据倾斜：
    https://blog.csdn.net/u012151684/article/details/77074356
    个别reduce运行缓慢
