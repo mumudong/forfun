@@ -1,4 +1,6 @@
 http://www.importnew.com/29813.html
+
+select `(rt_meta|dt)?+.+` from
 //下载源码依赖
 mvn dependency:resolve -Dclassifier=sources
 hive如何判断数据倾斜：
