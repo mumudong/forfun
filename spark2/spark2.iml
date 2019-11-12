@@ -10,7 +10,8 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="library" name="Maven: junit:junit:4.11" level="project" />
+    <orderEntry type="library" name="Maven: junit:junit:4.10" level="project" />
+    <orderEntry type="library" name="Maven: org.hamcrest:hamcrest-core:1.1" level="project" />
     <orderEntry type="library" name="Maven: org.postgresql:postgresql:9.4.1207.jre7" level="project" />
     <orderEntry type="library" name="Maven: mysql:mysql-connector-java:5.1.44" level="project" />
     <orderEntry type="library" name="Maven: org.apache.spark:spark-core_2.11:2.3.1" level="project" />
@@ -290,6 +291,9 @@
     <orderEntry type="library" scope="RUNTIME" name="Maven: commons-el:commons-el:1.0" level="project" />
     <orderEntry type="library" name="Maven: org.jamon:jamon-runtime:2.3.1" level="project" />
     <orderEntry type="library" name="Maven: com.lmax:disruptor:3.3.0" level="project" />
+    <orderEntry type="library" name="Maven: commons-configuration:commons-configuration:1.6" level="project" />
+    <orderEntry type="library" name="Maven: commons-digester:commons-digester:1.8" level="project" />
+    <orderEntry type="library" name="Maven: commons-beanutils:commons-beanutils:1.8.0" level="project" />
     <orderEntry type="library" name="Maven: log4j:log4j:1.2.17" level="project" />
     <orderEntry type="library" name="Maven: com.alibaba:fastjson:1.2.35" level="project" />
     <orderEntry type="library" name="Maven: commons-io:commons-io:2.4" level="project" />

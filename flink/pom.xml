@@ -77,14 +77,6 @@
                             <goal>compile</goal>
                         </goals>
                     </execution>
-                    <execution>
-                        <id>test-compile-scala</id>
-                        <phase>test-compile</phase>
-                        <goals>
-                            <goal>add-source</goal>
-                            <goal>testCompile</goal>
-                        </goals>
-                    </execution>
                 </executions>
                 <configuration>
                     <scalaVersion>2.11.8</scalaVersion>

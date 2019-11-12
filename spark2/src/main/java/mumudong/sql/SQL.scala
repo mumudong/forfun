@@ -1,9 +1,11 @@
 package mumudong.sql
 
 import java.util.Properties
+
 import org.apache.spark.sql.expressions.Aggregator
 import org.apache.spark.sql.{Encoder, Encoders, SaveMode, SparkSession}
 import org.junit.{After, Before, Test}
+import org.slf4j.LoggerFactory
 
 /**
   * ━━━━━━神兽出没━━━━━━
@@ -91,11 +93,13 @@ class SQL {
     }
     @Test
     def agg = {
+
         val session = SparkSession
             .builder()
             .master("local[*]")
             .appName(s"$this.getClass.getSimpleName")
             .getOrCreate()
+        session.sparkContext.setLogLevel("ERROR");
         import session.implicits._
         val ds = session.read.json("data/employees.json").as[Employee]
         ds.show()
