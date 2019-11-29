@@ -1,4 +1,4 @@
-package test;
+package serialize;
 
 import com.alibaba.fastjson.JSON;
 import com.esotericsoftware.kryo.Kryo;
