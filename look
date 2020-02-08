@@ -4,6 +4,7 @@ clickhouse   https://blog.csdn.net/china_world/article/details/52687685?location
 java -server -Xms3036m -Xmx8240m -verbose:gc -XX:+UseG1GC -XX:PermSize=128m -XX:MaxPermSize=128m -Xss256k -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpP
 ath=/export/rtdw/logs/$1.log  -XX:+PrintGCDetails -jar /export/rtdw/translate-11.8.nocheck-SNAPSHOT.jar --spring.profiles.active=pro --dbrep.node.name=
 $1 --dbrep.version=$2 --reader.distribute.num=${distributeNum} --log.path=/export/rtdw/logs/$1 >> /export/rtdw/logs/$1/translate.log 2>&1 &
+jps -ml|grep TaskRunnerApplicationBootstrap|awk '{print $1}'| xargs -n 1 -I [] awk '/^Swap:/ {SWAP+=$2}END{print SWAP" KB  []"}' /proc/[]/smaps
 
 第一步：通过MR生成hbase对应HFile文件
 第二步：hadoop distcp跨集群拷贝
