@@ -24,7 +24,8 @@ object WaterMarkTest {
         env.setStreamTimeCharacteristic(TimeCharacteristic.EventTime)//设置基于事件时间统计
 
         import org.apache.flink.api.scala._
-        val text = env.socketTextStream("hadoop-7",11199)
+
+        val text = env.socketTextStream("mu1",11999)
                         .map( x => (x.split("\\W+")(0), x.split("\\W+")(1).toLong))
                         .assignTimestampsAndWatermarks(new TimeStampExractor)
 
@@ -52,7 +53,7 @@ object WaterMarkTest {
     class TimeStampExractor extends AssignerWithPeriodicWatermarks[(String,Long)] with Serializable{
         var currentMaxTimestamp = 0L
         val maxOutOfOrderness = 10000L//最大允许的乱序时间是10s
-        var water : Watermark = null
+        var water : Watermark = _
 
         val format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS")
 

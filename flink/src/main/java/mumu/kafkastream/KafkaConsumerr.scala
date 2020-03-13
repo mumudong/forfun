@@ -11,7 +11,7 @@ import org.apache.flink.streaming.api.functions.AssignerWithPunctuatedWatermarks
 import org.apache.flink.streaming.api.scala.StreamExecutionEnvironment
 import org.apache.flink.streaming.api.watermark.Watermark
 import org.apache.flink.streaming.api.windowing.time.Time
-import org.apache.flink.streaming.connectors.kafka.{FlinkKafkaConsumer010, FlinkKafkaConsumer08}
+import org.apache.flink.streaming.connectors.kafka.{FlinkKafkaConsumer010}
 import org.apache.flink.util.Collector
 import org.slf4j.LoggerFactory
 
@@ -44,13 +44,13 @@ object KafkaConsumerr {
         props.put("value.deserializer", "org.apache.kafka.common.serialization.StringDeserializer")
 
         import org.apache.flink.api.scala._
-        val kafka = new FlinkKafkaConsumer08[String]("flink",new SimpleStringSchema(),props)
+        val kafka = new FlinkKafkaConsumer010[String]("flink",new SimpleStringSchema(),props)
         kafka.assignTimestampsAndWatermarks(new MessageWaterEmitter())
         val keyedStream = env.addSource(kafka)
                             .flatMap(new MessageSpliter())
                             .keyBy(0)
                             .timeWindow(Time.seconds(10))
-                            .reduce((x1,x2) => (x1._1,x1._2 + x2._2,x1._3 + "|" + x2._3))
+                            .reduce((x1,x2) => (x1._1,Integer.valueOf(x1._2 + x2._2),x1._3 + "|" + x2._3))
 
         keyedStream.writeAsText("/output.txt",FileSystem.WriteMode.OVERWRITE)
         keyedStream.print()

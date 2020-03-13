@@ -1,6 +1,10 @@
 离线抽取，延迟时会导致数据丢失(如23:59分数据延迟20分钟,24:00抽取时会丢失)
        凌晨时部分业务库做活动期间压力大,抽取特别慢
 
+网关:kong,gateway
+注册中心:eurika,consule
+https://www.jianshu.com/p/a68e45bcadb6
+
 
 http://www.importnew.com/29813.html
 
