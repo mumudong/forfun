@@ -10,6 +10,8 @@ public class Main {
         while (true){
             message1 = MessageFactory.newInstance().copy(message1);
             System.out.println(message1.message() + " ---- " + message1.plus());
+            System.out.println(message1.message() + " ---- " + message1.getClass());
+
             Thread.sleep(4000l);
         }
     }

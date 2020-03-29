@@ -6,6 +6,15 @@ ath=/export/rtdw/logs/$1.log  -XX:+PrintGCDetails -jar /export/rtdw/translate-11
 $1 --dbrep.version=$2 --reader.distribute.num=${distributeNum} --log.path=/export/rtdw/logs/$1 >> /export/rtdw/logs/$1/translate.log 2>&1 &
 jps -ml|grep TaskRunnerApplicationBootstrap|awk '{print $1}'| xargs -n 1 -I [] awk '/^Swap:/ {SWAP+=$2}END{print SWAP" KB  []"}' /proc/[]/smaps
 
+spark steaming exactly once:
+    structured streaming:通过checkpoint wal和可重放的源数据来保证数据不丢失,sink需保证幂等性
+
+flink 使用jobmanager通过checkpointcoordinator向source中发送checkpointbarrier，栅栏流到一个算子，该算子暂停运算，并将自身状态存入statebackend,通过栅栏对齐实现内部exactly once,通过不对齐实现at least once
+我程序中Flink的CheckPoint语义设置了 Exactly Once，但是我的mysql中看到数据重复了？程序中设置了1分钟1次CheckPoint，但是5秒向mysql写一次数据，并commit；
+      答：Flink要求end to end的精确一次都必须实现TwoPhaseCommitSinkFunction。如果你的chk-100成功了，过了30秒，由于5秒commit一次，所以实际上已经写入了6批数据进入mysql，但是突然程序挂了，从chk100处恢复，这样的话，之前提交的6批数据就会重复写入，所以出现了重复消费。Flink的精确一次有两种情况，一个是Flink内部的精确一次，一个是端对端的精确一次，这个博客所描述的都是关于Flink内部去的精确一次，我后期再发一个博客详细介绍一下Flink端对端的精确一次如何实现
+
+hive --hiveconf hive.root.logger=DEBUG,console
+
 JSqlParser 0.9.7 发布，SQL 解析工具
 第一步：通过MR生成hbase对应HFile文件
 第二步：hadoop distcp跨集群拷贝

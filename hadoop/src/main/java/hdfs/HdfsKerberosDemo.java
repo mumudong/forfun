@@ -35,6 +35,7 @@ public class HdfsKerberosDemo {
         conf.set("dfs.ha.namenodes.tianxi-ha", "nn1,nn2");
         conf.set("dfs.namenode.rpc-address.tianxi-ha.nn1", "hadoop-1:8020");
         conf.set("dfs.namenode.rpc-address.tianxi-ha.nn2", "hadoop-2:8020");
+        conf.set("fs.hdfs.impl", "org.apache.hadoop.hdfs.DistributedFileSystem");
         conf.set("dfs.client.failover.proxy.provider.ns1", "org.apache.hadoop.hdfs.server.namenode.ha.ConfiguredFailoverProxyProvider");
         conf.set("hadoop.security.authentication","kerberos");
         System.setProperty("java.security.krb5.conf", basePath.substring(6) + "krb5.conf");
