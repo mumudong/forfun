@@ -4,6 +4,8 @@ clickhouse   https://blog.csdn.net/china_world/article/details/52687685?location
 spark grouping sets 等操作 https://blog.csdn.net/u011622631/article/details/84786777
 spark sql优化案例 https://mp.weixin.qq.com/s?__biz=MzU5NTc1NzE2OA==&mid=2247483913&idx=1&sn=6d7736eb43dfbbdf25508d266d8606f7&chksm=fe6c5316c91bda00a8d2d34eb6ea92e2eb85a21f45586a0b7f71ff92745131d51ea247d4f112&scene=21#wechat_redirect
 
+技术博客 http://blog.didispace.com/
+
 java -server -Xms3036m -Xmx8240m -verbose:gc -XX:+UseG1GC -XX:PermSize=128m -XX:MaxPermSize=128m -Xss256k -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpP
 ath=/export/rtdw/logs/$1.log  -XX:+PrintGCDetails -jar /export/rtdw/translate-11.8.nocheck-SNAPSHOT.jar --spring.profiles.active=pro --dbrep.node.name=
 $1 --dbrep.version=$2 --reader.distribute.num=${distributeNum} --log.path=/export/rtdw/logs/$1 >> /export/rtdw/logs/$1/translate.log 2>&1 &
