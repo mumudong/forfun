@@ -6,6 +6,10 @@ spark sql优化案例 https://mp.weixin.qq.com/s?__biz=MzU5NTc1NzE2OA==&mid=2247
 
 技术博客 http://blog.didispace.com/
 
+查看分区下数据块健康信息和数据块大小
+hdfs fsck hdfs://ns:8020/hive/db/db.db/table/dt=2020-04-07 -files -blocks
+hive --orcfiledump  path
+
 java -server -Xms3036m -Xmx8240m -verbose:gc -XX:+UseG1GC -XX:PermSize=128m -XX:MaxPermSize=128m -Xss256k -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpP
 ath=/export/rtdw/logs/$1.log  -XX:+PrintGCDetails -jar /export/rtdw/translate-11.8.nocheck-SNAPSHOT.jar --spring.profiles.active=pro --dbrep.node.name=
 $1 --dbrep.version=$2 --reader.distribute.num=${distributeNum} --log.path=/export/rtdw/logs/$1 >> /export/rtdw/logs/$1/translate.log 2>&1 &
