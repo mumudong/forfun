@@ -1,4 +1,4 @@
-package lock;
+package javalearn.lock;
 
 import org.apache.zookeeper.*;
 import org.apache.zookeeper.data.Stat;
@@ -9,7 +9,6 @@ import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -112,7 +111,7 @@ public class DistributeLockZK implements Lock, Watcher {
             // 取出所有lockName的锁，即当前工程对应的锁名字
             List<Integer> lockObjects = new ArrayList<>();
             for (String node : subNodes) {
-                // 比如 /lock/test1_lock_xx-2
+                // 比如 /javalearn.lock/test1_lock_xx-2
                 String _node = node.split(splitStr)[0];
                 if (_node.equals(lockName)) {
                     lockObjects.add(Integer.valueOf(node.split(splitStr)[1]));

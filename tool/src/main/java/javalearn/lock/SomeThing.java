@@ -1,4 +1,4 @@
-package lock;
+package javalearn.lock;
 
 import java.util.ArrayList;
 import java.util.List;

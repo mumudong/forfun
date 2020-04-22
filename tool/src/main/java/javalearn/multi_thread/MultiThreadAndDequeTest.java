@@ -1,14 +1,4 @@
-package multi_thread;
-
-import com.alibaba.fastjson.JSON;
-
-import java.lang.reflect.Method;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.*;
-import java.util.concurrent.*;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
+package javalearn.multi_thread;
 
 public class MultiThreadAndDequeTest {
     public static void main(String[] args) throws Exception {
@@ -19,18 +9,18 @@ public class MultiThreadAndDequeTest {
         String dt = "2019";
         ExecutorService service = Executors.newFixedThreadPool(4);
         String jobName = "aaa";
-        Lock lock = new ReentrantLock();
+        Lock javalearn.lock = new ReentrantLock();
         for(int i = 0;i < 4;i++) {
             final int j = i;
             service.execute(() -> {
                 try {
-                    lock.lock();
+                    javalearn.lock.javalearn.lock();
                     result.putIfAbsent(dt, new ConcurrentHashMap<>());
                     result.get(dt).putIfAbsent(jobName, Collections.synchronizedSet(new HashSet<>()));
                     result.get(dt).get(jobName).add(j+"");
                     System.out.println(result.get(dt).get(jobName).size());
                 } finally {
-                    lock.unlock();
+                    javalearn.lock.unlock();
                 }
             });
 */

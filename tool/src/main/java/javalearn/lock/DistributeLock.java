@@ -1,4 +1,4 @@
-package lock;
+package javalearn.lock;
 
 import org.apache.curator.RetryPolicy;
 import org.apache.curator.framework.CuratorFramework;
@@ -18,8 +18,8 @@ public class DistributeLock {
         RetryPolicy retryPolicy = new ExponentialBackoffRetry(1000, 3);
         CuratorFramework client = CuratorFrameworkFactory.newClient("hadoop-5:2181", retryPolicy);
         client.start();
-        //创建分布式锁, 锁空间的根节点路径为/curator/lock
-        InterProcessMutex mutex = new InterProcessMutex(client, "/curator/lock");
+        //创建分布式锁, 锁空间的根节点路径为/curator/javalearn.lock
+        InterProcessMutex mutex = new InterProcessMutex(client, "/curator/javalearn.lock");
         mutex.acquire();
         //获得了锁, 进行业务流程
         System.out.println("Enter mutex");

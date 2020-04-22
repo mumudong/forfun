@@ -1,4 +1,4 @@
-package lock;
+package javalearn.lock;
 
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
@@ -50,7 +50,7 @@ public class ConditionDemo {
                     }
                 }
                 finally{
-                    System.out.println("A lock unlock() ...");
+                    System.out.println("A javalearn.lock unlock() ...");
                     lock.unlock();
                 }
             }
@@ -87,7 +87,7 @@ public class ConditionDemo {
                     }
                 }
                 finally{
-                    System.out.println("B lock unlock() ...");
+                    System.out.println("B javalearn.lock unlock() ...");
                     lock.unlock();
                 }
             }

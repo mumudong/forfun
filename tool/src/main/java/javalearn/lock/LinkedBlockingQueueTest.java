@@ -1,6 +1,5 @@
-package lock;
+package javalearn.lock;
 
-import java.util.Random;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 

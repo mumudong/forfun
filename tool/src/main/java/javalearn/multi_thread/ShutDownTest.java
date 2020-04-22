@@ -1,4 +1,4 @@
-package hdfs;
+package javalearn.multi_thread;
 
 import org.junit.Test;
 

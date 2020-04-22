@@ -1,4 +1,4 @@
-package multi_thread.exception;
+package javalearn.multi_thread.exception;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;

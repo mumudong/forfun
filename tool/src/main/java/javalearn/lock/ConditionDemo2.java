@@ -1,4 +1,4 @@
-package lock;
+package javalearn.lock;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -109,7 +109,7 @@ class MyCount {
             System.out.println(name + "存款完成" + x + "，当前余额为" + cash);
         }
         _draw.signalAll(); // 唤醒所有等待线程。
-        System.out.println(name + " lock.unlock() ....");
+        System.out.println(name + " javalearn.lock.unlock() ....");
         lock.unlock(); // 释放锁
     }
 
@@ -139,7 +139,7 @@ class MyCount {
         } catch (InterruptedException e) {
             e.printStackTrace();
         } finally {
-            System.out.println(name + " lock.unlock() ....");
+            System.out.println(name + " javalearn.lock.unlock() ....");
             lock.unlock(); // 释放锁
         }
     }

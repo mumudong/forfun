@@ -1,4 +1,4 @@
-package lock;
+package javalearn.lock;
 
 import java.util.concurrent.CyclicBarrier;
 import java.util.concurrent.ExecutorService;

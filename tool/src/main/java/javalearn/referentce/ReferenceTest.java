@@ -1,4 +1,4 @@
-package referentce;
+package javalearn.referentce;
 
 import java.lang.ref.Reference;
 import java.lang.ref.ReferenceQueue;

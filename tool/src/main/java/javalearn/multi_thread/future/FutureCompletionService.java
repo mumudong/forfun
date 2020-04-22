@@ -1,4 +1,4 @@
-package multi_thread.future;
+package javalearn.multi_thread.future;
 
 import java.util.Random;
 import java.util.concurrent.*;

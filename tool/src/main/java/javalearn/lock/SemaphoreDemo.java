@@ -1,4 +1,4 @@
-package lock;
+package javalearn.lock;
 
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.locks.ReentrantLock;
@@ -37,7 +37,7 @@ public class SemaphoreDemo {
         int id = -1;
         lock.lock();
         try {
-            //lock.lock();//虽然使用了锁控制同步，但由于只是简单的一个数组遍历，效率还是很高的，所以基本不影响性能。    
+            //javalearn.lock.javalearn.lock();//虽然使用了锁控制同步，但由于只是简单的一个数组遍历，效率还是很高的，所以基本不影响性能。
             for(int i=0; i<10; i++){
                 if(resourceArray[i]){
                     resourceArray[i] = false;
@@ -55,10 +55,10 @@ public class SemaphoreDemo {
 }
 
 class ResourceUser implements Runnable {
-    private lock.SemaphoreDemo SemaphoreDemo;
+    private javalearn.lock.SemaphoreDemo SemaphoreDemo;
     private int userId;
 
-    public ResourceUser(lock.SemaphoreDemo SemaphoreDemo, int userId) {
+    public ResourceUser(javalearn.lock.SemaphoreDemo SemaphoreDemo, int userId) {
         this.SemaphoreDemo = SemaphoreDemo;
         this.userId = userId;
     }
@@ -70,7 +70,7 @@ class ResourceUser implements Runnable {
     }
 
     public static void main(String[] args) {
-        lock.SemaphoreDemo semaphoreDemo = new SemaphoreDemo();
+        javalearn.lock.SemaphoreDemo semaphoreDemo = new SemaphoreDemo();
         Thread[] threads = new Thread[100];
         for (int i = 0; i < 100; i++) {
             Thread thread = new Thread(new ResourceUser(semaphoreDemo, i));//创建多个资源使用者

@@ -1,4 +1,4 @@
-package multi_thread;
+package javalearn.multi_thread;
 
 /**
  *
