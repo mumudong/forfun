@@ -7,6 +7,7 @@
         <module>sso-application-one</module>
         <module>sso-application-two</module>
         <module>sso-server</module>
+        <module>zuul</module>
     </modules>
 
     <groupId>cc.mrbird</groupId>

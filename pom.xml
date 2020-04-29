@@ -21,6 +21,7 @@
         <module>spark1</module>
         <module>ansj-solr</module>
         <module>spark2</module>
+        <module>web/sso/zuul</module>
     </modules>
 
     <name>forfun</name>
