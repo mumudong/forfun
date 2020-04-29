@@ -1,0 +1,52 @@
+通过在Flink命令中指定“savepoint”关键字来触发Savepoints操作，同时需要在命令中指定jobId和targetDirectory（两个参数），其中jobId是需要触发Savepoints操作的Job Id编号，targetDirectory指定Savepoint数据存储路径，所有Savepoint存储的数据都会放置在该配置路径中。
+    bin/flink savepoint :jobId [:targetDirectory]
+在Hadoop Yarn上提交的应用，需要指定Flink jobId的同时也需要通过使用yid指定YarnAppId，其他参数和普通模式一样。
+    bin/flink savepoint :jobId [:targetDirectory] -yid :y
+通过cancel命令将停止Flink任务的同时将自动触发Savepoints操作，并把中间状态数据写入磁盘，用以后续的任务恢复。
+    bin/flink cancel -s [:targetDirectory] :j
+
+bin/flink run -s :savepointPath [:runArgs]
+通过使用run命令将任务从保存的Savepoint中恢复，其中-s参数指定了Savepoint数据存储路径。通常情况下Flink通过使用savepoint可以恢复应用中的状态数据，
+但在某些情况下如果应用中的算子和Savepoint中的算子状态可能不一致，例如用户在新的代码中删除了某个算子，这时就会出现任务不能恢复的情况，
+此时可以通过--allowNonRestoredState（--n）参数来设置忽略状态无法匹配的问题，让程序能够正常启动和运行。
+
+bin/flink savepoint -d :savepointPath
+可以通过以上--dispose（-d）命令释放已经存储的Savepoint数据，这样存储在指定路径中的savepointPath将会被清除掉。
+
+启动一个监听端口
+    $ nc -l 9000
+flink提交任务
+    $ ./bin/flink run examples/streaming/SocketWindowWordCount.jar --port 9000
+
+    $ ./bin/stop-local.sh
+
+flink on yarn: https://my.oschina.net/u/3522232/blog/2051960
+     需要拷贝：jersey*,
+    export HADOOP_CLASSPATH="/usr/hdp/current/hadoop-client/*:/usr/hdp/current/hadoop-client/lib/*:/usr/hdp/current/hadoop-hdfs-client/*:/usr/hdp/current/hadoop-hdfs-client/lib/*:/usr/hdp/current/hadoop-yarn-client/*:/usr/hdp/current/hadoop-yarn-client/lib/*"
+    export HADOOP_USER_NAME=hdfs
+
+    启动yarn session,可以提交多个作业
+    yarn session -q可以查看集群资源状态
+
+    ./bin/yarn-session.sh -n 10 -tm 2048 -s 2  前台运行，ctrl + c停止即可
+    yarn-session.sh -n 3 -jm 2048 -tm 2048 -s 8 -nm FlinkOnYarnSession -d -st
+
+    -d参数可以后台运行，需要 yarn application -kill 关闭
+    绑定到已有的yarn session命令：./bin/yarn-session.sh -id application_1463870264508_0029
+
+    请注意：client期望设置-yn 参数(taskmanager的数量)推荐每次创建yarn cluster独立管理
+    ./bin/flink run -m yarn-cluster -yn 2 ./examples/batch/WordCount.jar
+./bin/flink run -m yarn-cluster -yn 2 -c mumu.SocketWordCount /opt/test-1.0-SNAPSHOT.jar --port 11199
+
+    修改flink默认日志
+    vi /usr/local/flink-1.3.3/conf/log4j.properties
+    log4j.appender.file.append=true
+    log4j.appender.file.MaxFileSize=100M
+    log4j.appender.file.MaxBackupIndex=10
+    flink的日志会应用到每个flink应用程序上
+
+
+flink 的 yarn 客户端通过下面的配置参数来控制容器的故障恢复。这些参数可以通过conf/flink-conf.yaml 或者在启动yarn session的时候通过-D参数来指定。
+    yarn.reallocate-failed：这个参数控制了flink是否应该重新分配失败的taskmanager容器。默认是true。
+	yarn.maximum-failed-containers：applicationMaster可以接受的容器最大失败次数，达到这个参数，就会认为yarn session失败。默认这个次数和初始化请求的taskmanager数量相等(-n 参数指定的)。
+	yarn.application-attempts：applicationMaster重试的次数。如果这个值被设置为1(默认就是1)，当application master失败的时候，yarn session也会失败。设置一个比较大的值的话，yarn会尝试重启applicationMaster。

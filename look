@@ -10,6 +10,18 @@ spark sql优化案例 https://mp.weixin.qq.com/s?__biz=MzU5NTc1NzE2OA==&mid=2247
 hdfs fsck hdfs://ns:8020/hive/db/db.db/table/dt=2020-04-07 -files -blocks
 hive --orcfiledump  path
 
+set hive.exec.orc.split.strategy=ETL;
+set mapreduce.input.fileinputformat.split.maxsize = 256000000
+
+set mapred.reduce.tasks=10;
+set hive.exec.orc.split.strategy=ETL;
+set mapreduce.input.fileinputformat.split.maxsize = 26000000;
+insert overwrite table tb(dt = 'test_04_14')
+select  data
+ from tb
+where dt = '2020-04-14' distribute by rand(123);
+
+
 java -server -Xms3036m -Xmx8240m -verbose:gc -XX:+UseG1GC -XX:PermSize=128m -XX:MaxPermSize=128m -Xss256k -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpP
 ath=/export/rtdw/logs/$1.log  -XX:+PrintGCDetails -jar /export/rtdw/translate-11.8.nocheck-SNAPSHOT.jar --spring.profiles.active=pro --dbrep.node.name=
 $1 --dbrep.version=$2 --reader.distribute.num=${distributeNum} --log.path=/export/rtdw/logs/$1 >> /export/rtdw/logs/$1/translate.log 2>&1 &
