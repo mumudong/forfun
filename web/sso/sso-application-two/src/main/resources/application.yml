@@ -10,5 +10,4 @@ security:
         key-uri: http://127.0.0.1:8080/server/oauth/token_key
 server:
   port: 9091
-  servlet:
-    context-path: /app2
+  context-path: /app2

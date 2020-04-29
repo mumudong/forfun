@@ -7,7 +7,7 @@ import org.springframework.boot.builder.SpringApplicationBuilder;
 /**
  * @author MrBird
  */
-@EnableOAuth2Sso
+
 @SpringBootApplication
 public class SsoApplicaitonOne {
 

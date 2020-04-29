@@ -21,7 +21,17 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http.formLogin()
-            .and()
+                .and()
+                .logout().logoutUrl("/logout").permitAll()
+                .logoutSuccessHandler(
+                        (request, response, authentication) -> {
+                            String callback = request.getParameter("callback");
+                            if (callback == null){
+                                callback = "/login?logout";
+                            }
+                            response.sendRedirect(callback);
+                        }
+                ).and()
                 .authorizeRequests()
                 .anyRequest()
                 .authenticated();
