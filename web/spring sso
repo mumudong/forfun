@@ -1,3 +1,9 @@
+spring oauth2教程
+https://mp.weixin.qq.com/s?__biz=MzI1NDY0MTkzNQ==&mid=2247488278&idx=1&sn=b21345a1daa86dd48ea89cdb9138def8&scene=21#wechat_redirect
+
+
+
+
 spring security原理 https://www.jianshu.com/p/0c54788c94f3
 配置文件自动配置原理
 
@@ -126,22 +132,99 @@ spring security启动WebSecurityConfiguration主要做了两件事情：
 1.根据WebSecurityConfigurerAdapter中配置的信息创建WebSecurity这个类
 2.springSecurityFilterChain()创建了一个名叫springSecurityFilterChain的过滤器，然后值得一提的是在调用WebSecurity的build()创建过滤器的时候，调用到了WebSecurity的init()方法创建了一个HttpSecurity的对象，这里会根据配置为我们创建过滤器，最后添加到DefaultSecurityFilterChain过滤器链里面来
 
-
-
-
-
-
-
-
-
-
     DelegatingFilterProxy extends GenericFilterBean
       调用父类init()
     springSecurityFilterChain(在httpSecurityBeanDefinitionParser中对其注册了别名 filterChainProxy)
 
+认证服务器:
+AuthenticationProvider验证authentication
+                      包括本地和remote(oauth2)等
+tokenService用于生成token(oauth2有不同接口,可以通过搜tokenService找到相应的接口)
+AuthorizationCodeServices用于生成授权码code
+AuthorizationServerEndpointsConfigurer ,用于配置上述设置
+
+校验包括用户校验和客户端校验
+ClientDetailsServiceConfigurer可以配置客户端相关设置
+clientDetailsService校验客户端
+
+AuthorizationServerEndpointsConfigurer
+用于配置AuthorizationCodeServices 和tokenService
 
 
+资源服务器:网上看到的例子，资源服务器大多都是和授权服务器放在一起的，如果项目比较小的话，这样做是没问题的，但是如果是一个大项目，这种做法就不合适了。
 
+资源服务器就是用来存放用户的资源，例如你在微信上的图像、openid 等信息，用户从授权服务器上拿到 access_token 之后，接下来就可以通过 access_token 来资源服务器请求数据
+@Configuration
+@EnableResourceServer
+public class ResourceServerConfig extends ResourceServerConfigurerAdapter {
+    @Bean
+    RemoteTokenServices tokenServices() {
+        RemoteTokenServices services = new RemoteTokenServices();
+        services.setCheckTokenEndpointUrl("http://localhost:8080/oauth/check_token");
+        services.setClientId("javaboy");
+        services.setClientSecret("123");
+        return services;
+    }
+    @Override
+    public void configure(ResourceServerSecurityConfigurer resources) throws Exception {
+        resources.resourceId("res1").tokenServices(tokenServices());
+    }
+
+    @Override
+    public void configure(HttpSecurity http) throws Exception {
+        http.authorizeRequests()
+                .antMatchers("/admin/**").hasRole("admin")
+                .anyRequest().authenticated();
+    }
+}
+
+第三方应用:
+   登录页面有一个 第三方登录超链接到认证服务器
+<a href="http://localhost:8080/oauth/authorize?client_id=javaboy&response_type=code&scope=all&redirect_uri=http://localhost:8082/index.html">第三方登录</a>
+拿到返回的授权码之后再请求资源服务器
+            map.add("code", code);
+            map.add("client_id", "javaboy");
+            map.add("client_secret", "123");
+            map.add("redirect_uri", "http://localhost:8082/index.html");
+            map.add("grant_type", "authorization_code");
+            Map<String,String> resp = restTemplate.postForObject("http://localhost:8080/oauth/token", map, Map.class);
+       String access_token = resp.get("access_token");
+            System.out.println(access_token);
+            HttpHeaders headers = new HttpHeaders();
+            headers.add("Authorization", "Bearer " + access_token);
+            HttpEntity<Object> httpEntity = new HttpEntity<>(headers);
+            ResponseEntity<String> entity = restTemplate.exchange("http://localhost:8081/admin/hello", HttpMethod.GET, httpEntity, String.class);
+            model.addAttribute("msg", entity.getBody());
+最后使用token访问资源服务器资源
+正常来说，access_token 我们可能需要一个定时任务去维护，不用每次请求页面都去获取，定期去获取最新的 access_token 即可
+============
+简化模式:简化模式无后端,一般app采用,可以使用js模拟请求资源服务器上面的数据,所以需要资源服务器支持跨域
+资源服务器增加如下配置:
+@RestController
+@CrossOrigin(value = "*")
+public class HelloController
+
+public void configure(HttpSecurity http) throws Exception {
+    http.authorizeRequests()
+            .antMatchers("/admin/**").hasRole("admin")
+            .anyRequest().authenticated()
+            .and()
+            .cors();
+}
+
+简化模式前端直接返回token不安全,可能被获取,授权码模式通过一次有效的授权码确保安全,后台获取token
+======================
+客户端模式没有前端
+============================
+
+小知识:使用刷新令牌获取新的令牌之后,旧的令牌就会失效
+======================================
+JWT自包含信息,无需服务端存储,减轻服务端压力
+JWT 也不是天衣无缝，由客户端维护登录状态带来的一些问题在这里依然存在，举例如下：
+续签问题，这是被很多人诟病的问题之一，传统的 cookie+session 的方案天然的支持续签，但是 jwt 由于服务端不保存用户状态，因此很难完美解决续签问题，如果引入 redis，虽然可以解决问题，但是 jwt 也变得不伦不类了。
+注销问题，由于服务端不再保存用户信息，所以一般可以通过修改 secret 来实现注销，服务端 secret 修改后，已经颁发的未过期的 token 就会认证失败，进而实现注销，不过毕竟没有传统的注销方便。
+密码重置，密码重置后，原本的 token 依然可以访问系统，这时候也需要强制修改 secret。
+基于第 2 点和第 3 点，一般建议不同用户取不同 secret。
 
 ====================================================
 
