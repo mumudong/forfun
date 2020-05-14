@@ -1,6 +1,17 @@
 clickhouse   https://blog.csdn.net/china_world/article/details/52687685?locationNum=1
              https://blog.csdn.net/u013676711/article/details/78862243
 
+Hortonworks的hadoop发行版HDP中,数据治理包括Falcon和Atlas这两个组件
+   Atlas主要负责元数据的管理. Falcon主要负责数据生命周期的管理
+总结来说, Falcon是在调度器Oozie上封装了一层,用户可以用Web UI上的wizard来配置数据流水线, 数据生命周期管理非常方便. 它最大的优点就是增强了Oozie的易用性, 对于业务逻辑比较复杂的系统, 用Falcon管理比起直接用Oozie会大大简化.
+但是调研中发现, Falcon Web UI上呈现的血缘关系只是以实体为中心, 并没有全局层面上整个data pipeline的血缘关系. 如果能够以pipeline为中心, 画出血缘关系图,提供zoom in功能, 以及在图中把实体运行状态可视化, 将会是一个很有用的特性.
+虽然被称为数据治理工具,但是它的功能只是集中在数据生命周期管理和流水线管理,要与元数据管理(Atlas),数据安全管理(Ranger)等组合,才能形成一个完整的数据治理解决方案.
+调研发现, Falcon的关注度并不算高,能搜到的英文资料主要是Apache和Hortonworks官网,中文资料几乎没有. 目前也没有看到哪个大公司在生产环境中用Falcon,我认为主要是因为Falcon提供的功能单一, 只解决了数据治理领域的一小部分需求,用户更愿意使用集中化的数据治理工具,或者自己开发.
+
+Apache Atlas为Hadoop集群提供了包括数据分类、集中策略引擎、数据血缘、安全和生命周期管理在内的元数据治理核心能力，其与Apache Falcon，Apache Ranger相互整合可以形成完整的数据治理解决方案。但是Atlas目前还是Apache孵化项目，尚未成熟，有待发展
+
+
+
 大数据学习qq群:894951460
 
 spark grouping sets 等操作 https://blog.csdn.net/u011622631/article/details/84786777

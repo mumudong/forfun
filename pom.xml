@@ -22,6 +22,7 @@
         <module>ansj-solr</module>
         <module>spark2</module>
         <module>web/sso/zuul</module>
+        <module>calcite</module>
     </modules>
 
     <name>forfun</name>
