@@ -17,6 +17,65 @@
             <artifactId>calcite-core</artifactId>
             <version>1.22.0</version>
         </dependency>
+
+        <dependency>
+            <groupId>org.quartz-scheduler</groupId>
+            <artifactId>quartz</artifactId>
+            <version>2.2.3</version>
+        </dependency>
+
+        <!-- https://mvnrepository.com/artifact/org.apache.calcite/calcite-csv -->
+        <dependency>
+            <groupId>org.apache.calcite</groupId>
+            <artifactId>calcite-csv</artifactId>
+            <version>1.22.0</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/org.apache.calcite/calcite-file -->
+        <dependency>
+            <groupId>org.apache.calcite</groupId>
+            <artifactId>calcite-file</artifactId>
+            <version>1.22.0</version>
+        </dependency>
+
+
+
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+            <version>3.8</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.hamcrest</groupId>
+            <artifactId>hamcrest</artifactId>
+            <version>2.1</version>
+        </dependency>
+
+        <dependency>
+            <groupId>net.sf.opencsv</groupId>
+            <artifactId>opencsv</artifactId>
+            <version>2.3</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.calcite.avatica</groupId>
+            <artifactId>avatica-core</artifactId>
+            <version>1.16.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <version>RELEASE</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>28.1-jre</version>
+            <scope>compile</scope>
+        </dependency>
+
+
     </dependencies>
 
 </project>

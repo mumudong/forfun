@@ -1,8 +1,10 @@
 package mumudong;
 
 import org.apache.calcite.adapter.java.ReflectiveSchema;
+import org.apache.calcite.adapter.jdbc.JdbcQueryProvider;
 import org.apache.calcite.config.Lex;
 import org.apache.calcite.jdbc.CalciteConnection;
+import org.apache.calcite.plan.RelOptUtil;
 import org.apache.calcite.rel.RelNode;
 import org.apache.calcite.rel.core.JoinRelType;
 import org.apache.calcite.rel.metadata.RelMdExpressionLineage;
@@ -96,14 +98,13 @@ public class App {
                 .build();
         RelBuilder relBuilder = RelBuilder.create(config);
         RelNode table = relBuilder
-                .scan("testdb","travelrecord")//schema与table的关系不能使用"schema.table"字符串表示
-                .scan("testdb","address")
-                .join(JoinRelType.INNER, "id")
-                .project(relBuilder.field("id"), relBuilder.field("user_id"))
+                .scan("hr","emps")//schema与table的关系不能使用"schema.table"字符串表示
+                .scan("hr","depts")
+                .join(JoinRelType.INNER, "deptno")
+                .project(relBuilder.field("name"), relBuilder.field("deptno"))
                 .build();
 
-
-
+        System.out.println(RelOptUtil.toString(table));
 
         ResultSet resultSet = statement.executeQuery(sql);
 

@@ -9,7 +9,7 @@ object Test{
         val sc = new SparkContext(conf)
         val hiveContext = new HiveContext(sc)
 //        hiveContext.setConf("yarn.timeline-service.enabled","false")
-        hiveContext.sql("show databases").show()
+        hiveContext.sql("show databases").groupBy("dt").count().orderBy().take(1)
         sc.stop()
     }
 
