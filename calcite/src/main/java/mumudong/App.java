@@ -6,6 +6,7 @@ import org.apache.calcite.config.Lex;
 import org.apache.calcite.jdbc.CalciteConnection;
 import org.apache.calcite.plan.RelOptUtil;
 import org.apache.calcite.rel.RelNode;
+import org.apache.calcite.rel.RelRoot;
 import org.apache.calcite.rel.core.JoinRelType;
 import org.apache.calcite.rel.metadata.RelMdExpressionLineage;
 import org.apache.calcite.schema.Schema;
@@ -15,6 +16,7 @@ import org.apache.calcite.sql.dialect.OracleSqlDialect;
 import org.apache.calcite.sql.parser.SqlParser;
 import org.apache.calcite.tools.FrameworkConfig;
 import org.apache.calcite.tools.Frameworks;
+import org.apache.calcite.tools.Planner;
 import org.apache.calcite.tools.RelBuilder;
 
 import java.sql.Connection;
@@ -91,6 +93,20 @@ public class App {
                 + "group by d.deptno\n"
                 + "having count(*) > 1";
 
+//        relTest(rootSchema);
+        planTest(rootSchema,sql);
+
+        ResultSet resultSet = statement.executeQuery(sql);
+
+        while(resultSet.next()){
+            System.out.println(resultSet.getInt("deptno") + " ," + resultSet.getString(2));
+        }
+        resultSet.close();
+        statement.close();
+        connection.close();
+    }
+
+    static void relTest(SchemaPlus rootSchema){
 
         final FrameworkConfig config = Frameworks.newConfigBuilder()
                 .parserConfig(SqlParser.configBuilder().setCaseSensitive(false).setLex(Lex.MYSQL).build())
@@ -105,16 +121,20 @@ public class App {
                 .build();
 
         System.out.println(RelOptUtil.toString(table));
+    }
 
-        ResultSet resultSet = statement.executeQuery(sql);
+    static void planTest(SchemaPlus rootSchema,String sql) throws Exception{
 
-        System.out.println((resultSet));
-        while(resultSet.next()){
-            System.out.println(resultSet.getInt("deptno") + " ," + resultSet.getString(2));
-        }
-        resultSet.close();
-        statement.close();
-        connection.close();
+        final FrameworkConfig config = Frameworks.newConfigBuilder()
+                .parserConfig(SqlParser.configBuilder().setCaseSensitive(false).setLex(Lex.MYSQL).build())
+                .defaultSchema(rootSchema)
+                .build();
+
+        Planner planner = Frameworks.getPlanner(config);
+        SqlNode sqlNode = planner.parse(sql);
+        SqlNode validate = planner.validate(sqlNode);
+        RelRoot plan = planner.rel(validate);
+        System.out.println(RelOptUtil.toString(plan.rel));
     }
 
     static void sqlParser() throws Exception{

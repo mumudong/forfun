@@ -10,6 +10,7 @@ Hortonworks的hadoop发行版HDP中,数据治理包括Falcon和Atlas这两个组
 
 Apache Atlas为Hadoop集群提供了包括数据分类、集中策略引擎、数据血缘、安全和生命周期管理在内的元数据治理核心能力，其与Apache Falcon，Apache Ranger相互整合可以形成完整的数据治理解决方案。但是Atlas目前还是Apache孵化项目，尚未成熟，有待发展
 
+calcite https://zhuanlan.zhihu.com/p/58139279
 
 
 大数据学习qq群:894951460
