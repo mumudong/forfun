@@ -1,18 +1,15 @@
-package mumudong;
+package lineage;
 
 import org.apache.calcite.adapter.java.ReflectiveSchema;
-import org.apache.calcite.adapter.jdbc.JdbcQueryProvider;
 import org.apache.calcite.config.Lex;
 import org.apache.calcite.jdbc.CalciteConnection;
 import org.apache.calcite.plan.RelOptUtil;
 import org.apache.calcite.rel.RelNode;
 import org.apache.calcite.rel.RelRoot;
 import org.apache.calcite.rel.core.JoinRelType;
-import org.apache.calcite.rel.metadata.RelMdExpressionLineage;
 import org.apache.calcite.schema.Schema;
 import org.apache.calcite.schema.SchemaPlus;
 import org.apache.calcite.sql.SqlNode;
-import org.apache.calcite.sql.dialect.OracleSqlDialect;
 import org.apache.calcite.sql.parser.SqlParser;
 import org.apache.calcite.tools.FrameworkConfig;
 import org.apache.calcite.tools.Frameworks;
@@ -24,8 +21,6 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.Properties;
-
-import static jdk.nashorn.internal.objects.Global.print;
 
 /**
  * Hello world!
