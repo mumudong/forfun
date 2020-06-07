@@ -9,6 +9,7 @@ https://www.cntofu.com/book/115/calculator-visitor.md教程
 java org.antlr.v4.Tool Math.g
 javac *.java
 java org.antlr.v4.gui.TestRig Math expr -gui
+java org.antlr.v4.gui.TestRig Math insert_stmt -gui
 
 java -jar antlr包查看参数
 java -jar /c/Javalib/antlr-4.7-complete.jar -visitor  Hello.g4
