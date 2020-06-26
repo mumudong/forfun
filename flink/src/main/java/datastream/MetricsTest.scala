@@ -11,4 +11,4 @@ object MetricsTest {
   }
 }
 
-class
+

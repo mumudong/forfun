@@ -12,8 +12,8 @@ object TagFun {
         println("TagFun.getClass --> " + TagFun.getClass) //得到子类
         println("classOf[Tagfun] --> " + classOf[TagFun]) //得到正确类
         println("equal --> " + TagFun.getClass == classOf[TagFun])
-        println("classOf[List[Int]] --> " + classOf[List[Int] ])
-        println("manifest[List[Int]] --> " + manifest[List[Int] ] )
+        println("classOf[List[Int]] --> " + classOf[List[Int] ]) //得到List类
+        println("manifest[List[Int]] --> " + manifest[List[Int] ] ) //得到正确类型
     }
     def testTypeTag(): Unit ={
         println("=================================================testTypeTag")
@@ -34,6 +34,7 @@ object TagFun {
         }
     }
     def testManifest2[t:Manifest](x:List[t]): Unit ={
+        println("=================================================testManifest2")
         println("this is testManifest2 --> " + manifest[t])
         val a = List(1,2)
         println("a.getClass --> " + a.getClass) //getclass 可以获取单一类型，不能获取复合类型

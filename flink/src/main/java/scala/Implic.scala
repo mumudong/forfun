@@ -12,6 +12,7 @@ object Swiming{
 
 class Implic
 object Implic{
+    //隐式参数,不传参数时会查找上下文中的隐式变量
     def person(implicit name:String) = name
     def testPerson={
         implicit val p = "implicit会搜索作用域内的隐式值作为参数"
