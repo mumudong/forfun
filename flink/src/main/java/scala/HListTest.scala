@@ -47,7 +47,8 @@ object HListTest {
     //scala方法名以:结尾,采用右结合的方式
     val s = 1 #:: {println("hi")} #:: {println("bai")} #:: Stream.empty
     println(s"s --> ${s}")
-    println(s(0),s(1),s(2))
+//    println(s(0),s(1),s(2))
+    println(s.toList)
     println(s"s --> ${s}")
 
     //斐波那契,如果内存放不下会出问题
@@ -82,12 +83,12 @@ object HListTest {
 
     //集合默认是严格、串行的,通过view来延迟计算(force前置执行,与view相反)、par来并行计算
     val res1 = (1 to 1000) .par.foldLeft(0)(_+_)//看不出来有没有并行
-    val res2 = (1 to 1000).par.foldLeft(Set[String]){
+    val res2 = (1 to 1000).par.foldLeft(Set[String]()){
       (set,value) => set + Thread.currentThread().toString();set
     }
-    val res3 = (1 to 1000).par map {
+    val res3 = (1 to 1000).par.map {
       x => Thread.currentThread().toString
-    } toSet
+    }.toSet
     println(s"res1 -> ${res1},res2 -> ${res2},res3 -> ${res3}")
   }
 }

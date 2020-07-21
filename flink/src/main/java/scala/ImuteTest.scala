@@ -51,13 +51,13 @@ object ImuteTest {
     var mp = HashMap(x -> "value_x",y -> "value_y")
     mp+=(new Point2(2,3,"xx") -> "新增")
     println(s"mp.size --> ${mp.size}")
-    println(mp(x))
-    println(mp(z))
-    println(mp.contains(z))
-    mp.foreach(x => println(s"${x._2} -> ${x._1.hashCode()}"))
+    println(s"mp(x) --> ${mp(x)}")
+    println(s"mp(z) --> ${mp(z)}")
+    println(s"mp.contains(z) --> ${mp.contains(z)}")
+    mp.foreach(x => println(s"move之前 ${x._2} -> ${x._1.hashCode()}"))
     x.move(1,1)
     mp+=(new Point2(10,10,"xxx") -> "最后")
-    mp.foreach(x => println(s"${x._2} -> ${x._1.hashCode()}"))
+    mp.foreach(x => println(s"move之后 ${x._2} -> ${x._1.hashCode()}"))
     //因为采用triermap,数据结构为数组加hashmap, x move之后数组对应下标变化,不能找到正确的hashmap
     //使用z 的时候可以找到正确的数组下标,但是在hashmap中比较equals时和x不能匹配了
     println(mp.contains(x))
