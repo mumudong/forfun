@@ -8,6 +8,9 @@ object QuickSort {
   }
 
   /**
+    * == (同equals ,同时避免null异常)
+    * eq(引用是否相同,ne反义)
+    *
     * <% 视界:   ordered接口有<函数,int也有<函数, 此处使用 T <% Ordered[T]标识 Int类型可以视作Ordered接口
     * 协变 +T: 类型放大至祖先
     * 逆变 -T: 类型缩小至子孙
