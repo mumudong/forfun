@@ -1,5 +1,6 @@
 clickhouse   https://blog.csdn.net/china_world/article/details/52687685?locationNum=1
              https://blog.csdn.net/u013676711/article/details/78862243
+clickhouse和kafka稀疏索引 https://blog.csdn.net/nazeniwaresakini/article/details/107225186
 
 Hortonworks的hadoop发行版HDP中,数据治理包括Falcon和Atlas这两个组件
    Atlas主要负责元数据的管理. Falcon主要负责数据生命周期的管理

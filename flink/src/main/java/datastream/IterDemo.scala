@@ -25,7 +25,7 @@ object IterDemo {
           val second = rand.nextInt(Bound / 2 - 1) + 1
           ctx.collect((first,second))
           counter += 1
-          Thread.sleep(5000L)
+          Thread.sleep(100L)
         }
       }
 
@@ -39,11 +39,12 @@ object IterDemo {
                                //partial solution计算斐波那契
                                val step = data.map(x => (x._1,x._2,x._4,x._3 + x._4,x._5 + 1))
                                //feedback为空则该条数据迭代结束
+                               step.map(x => println(x._1 + ":" + x._2 + "  -  " + x._3 + "---" + x._4))
                                val feedback = step.filter(x => withinBound(x._3,x._4))
                                val output = step.filter(x => !withinBound(x._3,x._4))
                                                 .map(x => ((x._1,x._2),x._5))
                                (feedback,output)
-                             },500L)
+                             },500L) //output超过500毫秒无数据,停止迭代
     numbers.print("-->")
     env.execute("fibonacci iter")
   }

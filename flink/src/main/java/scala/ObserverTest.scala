@@ -46,7 +46,7 @@ object ObserverTest {
     x.set(2)
     x.unobserve(handler)
 
-
+    test()
   }
 
   def test2():Unit = {

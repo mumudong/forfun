@@ -26,7 +26,7 @@ object DeltaIterDemo {
     */
   def iter(env:ExecutionEnvironment):Unit = {
     import org.apache.flink.api.scala._
-    val iterNum = 100000
+    val iterNum = 10000
     val random = Random
     val iterData = env.fromElements(0).iterate(iterNum) {
       data: DataSet[Int] =>   data.map(value => {
@@ -54,7 +54,7 @@ object DeltaIterDemo {
     */
   def deltaIter(env:ExecutionEnvironment):Unit = {
     import org.apache.flink.api.scala._
-    val iterNum = 1
+    val iterNum = 20
     val vertix = env.fromElements(1L,2L,3L,4L,5L,6L,7L)
     val edgs = env.fromElements(
       Tuple2(1L, 2L),
@@ -72,9 +72,19 @@ object DeltaIterDemo {
     val initialWorkset = vertix.map(x => (x,x))
     val initialSolutionSet = vertix.map(x => (x,x))
 
-    var runtime = iterNum
+    var runtime = 0
     val result = initialSolutionSet.iterateDelta(initialWorkset,iterNum,Array(0)){
       (solution,workset) => {
+        // 顶点   join  边
+        // (2,2) join (2,1) --> (1,2)
+        // (2,2) join (2,3) --> (3,2)
+        // (2,2) join (2,4) --> (4,2)
+        // (1,1) join (1,2) --> (2,1)
+        // (3,3) join (3,2) --> (2,3)
+        // (3,3) join (3,4) --> (4,3)
+        // (4,4) join (4,2) --> (2,4)
+        // (4,4) join (4,3) --> (3,4)
+        runtime += 1
         val changes = workset.join(edgs).where(0).equalTo(0).apply((x,y) => (y._2,x._2))
           .groupBy(0).aggregate(Aggregations.MIN,1)
           .join(solution).where(0).equalTo(0).apply(new FlatJoinFunction[(Long,Long),(Long,Long),(Long,Long)] {

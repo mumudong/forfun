@@ -1,0 +1,289 @@
+hadoop配置文件中可配置<final>true<final>标识不可被修改
+管理员可通过参数mapred.cluster.max.map.memory.mb和mapred.cluster.max.reduce.memory.mb限制用户配置的任务最大内存使用量
+Map Task完成数目达到一定比例（由参数mapred.reduce.slowstart.completed.maps指定，默认是0.05，即5%）后，才开始调度Reduce Task
+TaskTracker汇报心跳的时间间隔并不是一成不变的，它会随着集群规模的动态调整（比如节点死掉或者用户动态添加新节点）而变化，以便能够合理利用JobTracker的并发处理能力。在Hadoop MapReduce中，只有JobTracker知道某一时刻集群的规模，因此由JobTracker为每个TaskTracker计算下一次汇报心跳的时间间隔，并通过心跳机制告诉TaskTracker。
+
+jobtracker三层多叉树的方式跟踪每个作业的运行状态
+            jobInProgress
+       taskInProgress          taskInProgress   ....
+taskAttempt  taskAttempt ...
+一个taskAttempt成功则此taskInProgress成功,所有taskInProgress成功则jobInProgress成功
+
+允许每个TaskTracker上失败的Task个数，默认是4，通过参数mapred.max.tracker.failures
+设置。当该作业在某个TaskTracker上失败的个数超过该值时，会将该节点添加到该作业的黑名单中，调度不再分配任务
+
+步骤1　客户端调用作业提交函数将程序提交到JobTracker端
+步骤2　JobTracker收到新作业后，通知任务调度器（TaskScheduler）对作业进行初始化；
+步骤3　某个TaskTracker向JobTracker汇报心跳，其中包含剩余的slot数目和能否接收新任务等信息；
+步骤4　如果该TaskTracker能够接收新任务，则JobTracker调用TaskScheduler对外函数assignTasks为该TaskTracker分配新任务；
+步骤5　TaskScheduler按照一定的调度策略为该TaskTracker选择最合适的任务列表，并将该列表返回给JobTracker；
+步骤6　JobTracker将任务列表以心跳应答的形式返回给对应的TaskTracker；
+步骤7　TaskTracker收到心跳应答后，发现有需要启动的新任务，则直接启动该任务。
+
+我们将Map Task分解成Read、Map、Collect、Spill和Combine五个阶段，
+将Reduce Task分解成Shuffle、Merge、Sort、Reduce和Write五个阶段
+
+
+hadoop调优：<Hadoop技术内幕>
+   1--操作系统调优
+       1) 增大同时打开的文件描述符和连接上限
+       2) 关闭swap分区
+       3) 设置合理的预读缓冲区大小(磁盘io性能发展远远滞后于CPU和内存,预读有效减少磁盘寻道次数和程序io等待时间,可显著提高io性能)
+       4) 文件系统选择与配置(启用noatime,如未启用,每次读文件会触发额外的写操作记录最近访问时间,可通过将其添加到mount属性中避免)
+       5) io调度器,Linux发行版带了很多io调度器,在数据密集型应用中,不通io调度器性能差别表现巨大
+
+
+      hadoop参数调优：
+         1) 合理规划资源：设置合理的槽位数目,根据实际需要配置,健康监测脚本
+         2) 调整心跳配置：调整心跳间隔,间隔太小会造成资源空闲(因为是心跳时领取任务),间隔太大压力大
+                       启用带外心跳,及任务结束或失败时触发心跳,能在出现空闲资源时第一时间通知jobtracker(mapreduce.tasktracker.outofband.heartbeat)
+         3) 磁盘块配置：map task中间结果写在磁盘上,可配置多块磁盘缓解磁盘的写压力,多块磁盘时会轮询使用这些磁盘
+         4) 设置合理的RPC handler和HTTP线程数目：
+                 jobtracker需要并发处理tasktracker的rpc请求,设置合适的rpc handler使jobTracker处理能力最佳(mapreduce.jobtracker.hanler.count)
+                 shuffle阶段,reduce task通过http请求从taskTracker拉取中间结果,设置合适的netty(早期jetty)线程数,提升其并发处理能力
+         5) 慎用黑名单: 集群较小时会影响集群计算能力
+         6) 启用批量任务调度: fifo  fairScheduler capacityScheduler均支持批量调度
+                  一次心跳分配多个任务
+         7) 选择合适的压缩算法
+                 hadoop通常是io密集型应用,map中间结果对用户无感知,启用中间结果压缩可显著提升系统性能
+         8) 启用预读机制： hadoop是典型的顺序读系统,预读机制可显著提升性能
+              mapred.tasktracker.shuffle.fadvise=true  启用shuffle预读,默认开启
+              mapred.tasktracker.shuffle.readahead.bytes=4mb
+              mapreduce.ifile.readahead=true ifile预读(map中间结果)
+              mapreduce.ifile.readahead.bytes=4mb
+
+      用户角度
+        应用程序编写规范:
+            1) 设置combiner 减少map task中间结果输出,减少远程拷贝数据量
+            2) 选择合理的writable类型
+            3) 启用推测执行
+            4) 设置失败容忍度： 作业容忍度和任务容忍度,
+                   作业级别：允许每个作业有一定比例的任务运行失败,这部分任务对应的输入数据会被忽略,不会有产出
+                   任务级别：任务失败后在另外的节点上尝试运行,失败一定次数才认为是失败
+            5) 适当打开JVM重用功能
+                  每个任务运行在单独的jvm,对于执行时间较短的任务,jvm的启动和重启将占用较多时间,JVM重用后,一个jvm可连续启动多个同类型的任务
+                  mapreduce.job.jvm.num.tasks=1
+            6) 设置任务超时时间
+                任务因某种原因阻塞,会拖慢整个作业的进度,甚至可能导致作业无法结束,hadoop超时机制,如果一个任务一段时间没汇报进度,taskTracker会主动将其杀死,在另一个节点重启
+                mapreduce.task.timeout=600_000
+            7) 合理使用DistributedCache
+                   方式1:提交作业时上传相应文件
+                   方式2:文件上传至hdfs(更高效)
+            8) 合理控制reduce task启动时机
+                   reduce依赖map结果,reduce启动过早占用slot资源,启动过晚导致reduce获取资源延迟,增加运行时间
+            9) 跳过坏记录
+            10) 提高作业优先级 mapreduce.job.priority
+
+          任务级别调优：
+             map任务调优：缓存，阈值等
+             reduce调优：缓存，阈值，内存，拷贝线程
+
+
+hadoop队列管理
+   1、权限管理
+       mapred.queue.names
+       mapred.acls.enabled是否启用权限管理功能
+       mapred.queue.queueA.acl-submit-job -> userA groupA
+       mapred.queue.queueA.acl-administer-jobs -> group-admin
+   2、资源管理
+       capacityScheduler: CapacityTaskScheduler调度器
+           容量保证: 以队列为单位划分资源,队列设置上限和下限
+           灵活性: 资源空闲时可共享给其他队列,有其他作业提交到该队列,则其他队列释放资源后会归还给该队列
+           多重租赁: 支持多用户共享集群、多作业同时运行,为防止单作业、用户、队列独占资源,可增加多重约束(如单个作业同时运行任务数)
+           资源密集型作业： 单个任务需要的资源高于默认设置时,可同时为其分配多个slot,仅支持内存密集型
+           作业优先级：默认情况空闲资源优先给提交最早的作业,也可支持优先级,高优先级先获取资源
+
+           配置： capacity:资源量,所有队列之和小于100
+                 maximum-capacity:资源共享,资源可超过其容量,最多使用资源为此参数
+                 supports-priority: 是否支持优先级
+                 minimum-user-limit-percent: 100每个用户最低资源保障,一个队列多个用户,用户可使用的资源在最大和最小值之间,最大为用户均摊
+                 user-limit-factor: 1每个用户最多可使用的资源比
+                 maximum-initialized-active-tasks: 队列同时被初始化的任务上线,防止过多任务初始化占用大量内存
+                 maximum-initialized-active-tasks-per-user: 每个用户可同时初始化任务数
+                 init-accept-jobs-factor: 计算队列中可同时被初始化的作业上限
+                     init-accept-jobs-factor * maximum-system-jobs * capacity / 100
+                 maximum-system-jobs: 系统中最多可初始化的作业数目
+
+           capacity scheduler内部机制：
+               1、shell提交作业,jobClient将作业提交到jobTracker端
+               2、jobTracker通过监听器机制,将作业同步给taskScheduler中的监听器jobQueueManager
+                  jobQueueManager将作业添加到等待队列,有jobInitializationPoller线程按一定策略进行初始化
+               3、某一时刻taskTracker汇报心跳,心跳信息中要求jobTracker为其分配任务
+               4、jobTracker检测到taskTracker可接收任务后,调用TaskScheduler.assignTasks()为其分配任务
+            作业初始化：   作业初始化后才可被调度器调度从而获取资源,初始化速度慢于调度速度,可能会造成资源等待,所以capacityScheduler会
+                      过量初始化一些任务,让一部分任务处于资源等待
+                         capacityScheduler的作业初始化由线程JobInitializationPoller完成,该线程由若干工作线程JobInitializationThread
+                      组成,每个工作线程负责一个或多个队列的初始化工作
+                         1、用户作业提交至jobTracker后,jobTracker向所有注册的监听器传播该消息,capacityScheduler中的监听器JobQueueManager
+                      收到新作业添加的信息后,检查配置的作业数和资源约束,不满足则初始化失败,否则添加到对应的等待作业列表中
+                         2、每个队列中,按以下策略对未初始化的作业排序：
+                             如果支持优先级,按FIFO策略(先按优先级,再按到达时间),否则按到达时间排序,工作线程每隔一定时间遍历作业列表,选出满足配置的作业数
+                             和资源的作业
+                         3、jobTracker.initJob()对符合条件的作业执行初始化
+
+            任务调度 capacityScheduler.assignTask()   yahoo
+               1、更新各个队列资源使用量,包括正在运行的任务,已经使用的资源,资源容量和使用
+               2、选择Map Task,hadoop调度器三层调度,依次选择队列、作业、任务
+                   选择队列：选择资源使用率最低的队列
+                   选择作业：队列内待调度作业排序策略和初始化作业排序一样
+                   选择任务：遍历排序好的作业,检查taskTracker剩余资源是否满足当前作业的一个任务(一个任务可能需要多个slot)
+                          如果满足就将任务添加到已分配任务列表
+               3、选择Reduce Task
+                  只采用了大内存机制
+
+                多层队列调度,队列里面再划分队列,因为现实中多是以部分划分队列,可能需要进一步划分
+
+
+               map Task 中capacityScheduler用到的机制：
+                  机制1：大内存任务调度
+                        Hadoop假设所有任务同质,任务只能用一个slot,并未区分内存密集型任务,未解决该问题,capacityScheduler
+                      可根据任务内存需求量为其分配一个或多个slot
+                        该功能默认关闭,需配置mapred.cluster.map.memory.mb,mapred.cluster.reduce.memory.mb,
+                      mapred.cluster.max.map.memory.mb,mapred.cluster.max.reduce.memory.mb
+
+                  机制2：通过任务延迟调度提高数据本地性
+                  机制3：批量任务分配,mapred.capacity-scheduler.maximum-tasks-per-heartbeat
+                        该机制倾向于将任务分配给优先发送心跳的taskTracker,任务可能会集中在少数节点上,不利于负载均衡
+
+
+
+
+      fairScheduler    Facebook
+         与capacityScheduler不同之处
+           1、资源公平共享：每个资源池中按FIFO或Fair策略分配资源,Fair策略基于最大最小公平算法实现的资源多路复用,作业平分资源池
+           2、资源抢占：空闲资源共享给其他资源池,有新作业提交时,先等待再回收,等待一段时间未归还则杀死任务释放资源(capacityScheduler是等待任务完成回收资源,不会强杀)
+           3、负载均衡：基于任务数的负载均衡,尽可能将任务均分到各个节点
+           4、延迟调度： 提高任务的数据本地性
+           5、降低小作业调度延迟：小作业可优先获取资源并运行任务
+          mapred-site.xml配置
+              mapred. jobtracker.taskScheduler：采用的调度器所在的类，即为org.apache.hadoop.mapred.FairScheduler。
+              mapred. fairscheduler.poolnameproperty：资源池命名方式，包含以下三种命名方式。
+              user.name：默认值，一个UNIX用户对应一个资源池。
+              group.name：一个UNIX用户组对应一个资源池。
+              mapred.job.queue.name：一个队列对应一个资源池。如果设置为该值，则与Capacity Scheduler一样。
+              mapred. fairscheduler.allocation.file：Fair Scheduler配置文件所在位置，默认是$HADOOP_HOME/conf/fair-scheduler.xml。
+              mapred. fairscheduler.preemption：是否支持资源抢占，默认为false。
+              mapred. fairscheduler.preemption.only.log：是否只打印资源抢占日志，并不真正进行资源抢占。打开该选项可用于调试。
+              mapred. fairscheduler.assignmultiple：是否在一次心跳中同时分配Map Task和ReduceTask，默认为true。
+              mapred. fairscheduler.assignmultiple.maps：一次心跳最多分配的Map Task数目，默认是-1，表示不限制。
+              mapred. fairscheduler.assignmultiple.reduces：一次心跳最多分配的Reduce Task数目，默认是-1，表示不限制。
+              mapred. fairscheduler.sizebasedweight：是否按作业大小调整作业权重。将该参数置为true后，调度器会根据作业长度（任务数目）调整作业权重，以让长作业获取更多资源，默认是false。
+              mapred. fairscheduler.locality.delay.node：为了等待一个满足node-local的slot，作业可最长等待时间。
+              mapred. fairscheduler.locality.delay.rack：为了等待一个满足rack-local的slot，可最长等待时间。
+              mapred. fairscheduler.loadmanager：可插拔负载均衡器。用户可通过继承抽象类LoadManager实现一个负载均衡器，以决定每
+                    个TaskTracker上运行的Map Task和Reduce Task数目，默认实现是CapBasedLoadManager，它将集群中所有Task按照数量平均分配到各个TaskTracker上。
+              mapred. fairscheduler.taskselector：可插拔任务选择器。用户可通过继承TaskSelector抽象类实现一个任务选择器，以决定对于给定一个TaskTracker，为其选择作业中的哪个任务。具体实现时可考虑数据本地性，推测执行等机制。默认实现是DefaultTaskSelector，它使用了JobInProgress中提供的算法，具体可参考第6章。
+              mapred. fairscheduler.weightadjuster：可插拔权重调整器。用户可通过实现WeightAdjuster接口编写一个权重调整器，以动态调整运行作业的权重。
+
+          fair-scheduler.xml
+              minMaps：最少保证的Map slot数目，即最小资源量。
+              maxMaps：最多可以使用的Map slot数目。
+              minReduces：最少保证的Reduce slot数目，即最小资源量。
+              maxReduces：最多可以使用的Reduce slot数目。
+              maxRunningJobs：最多同时运行的作业数目。通过限制该数目，可防止超量MapTask同时运行时产生的中间输出结果撑爆磁盘。
+              minSharePreemptionTimeout：最小共享量抢占时间。如果一个资源池在该时间内使用的资源量一直低于最小资源量，则开始抢占资源。
+              schedulingMode：队列采用的调度模式，可以是FIFO或者Fair。
+
+       FailScheduler设计思想
+         1、根据各资源池配置的最小资源量分配资源
+         2、根据资源池的权重将剩余资源分配
+         3、各资源池中,按作业权重将资源分配给各个作业
+             normal 1.0
+             low 0.5
+             high 2.0
+             用户也可以通过打开mapred.fairscheduler.sizebasedweigh参数以根据作业长度调整权重或者编写权重调整器动态调整作业权重。
+
+       FairScheduler实现
+          1、加载fair-scheduler.xml配置
+          2、作业监听模块：fairScheduler启动时回想jobTracker注册作业监听器jobListener,用来获取作业变化
+          3、状态更新模块：updateThread线程每隔mapred.fairScheduler.update.interval时间更新队列和作业信息
+          4、调度模块：taskTracker心跳请求任务,根据队列和作业信息为该taskTracker分配一个或多个任务
+
+     fairScheduler与capacityScheduler对比
+
+            capacityScheduler                              failedScheduler
+
+设计思想      资源按比例分配给队列,添加各种严格限制               基于最大最小公平算法将资源分配给
+           防止个别用户和队列独占资源                        各个资源池或者用户
+
+动态加载配置        否                                             是
+  文件
+
+负载均衡           否                                             是
+
+资源抢占           否                                              是
+
+大内存作业       是,可一个作业多个slot                               否
+
+批量调度           是                                              是
+
+延迟调度          基于跳过次数的延迟调度                          基于时间的延迟调度
+
+队列内资源分配       默认按先到先跑,也支持优先级                    默认fair,也支持FIFO
+
+
+
+安全问题：
+    Hadoop RPC采用SASL简单认证和安全层进行安全认证
+    认证方式主要包括：
+       ANONYMOUS：不认证
+       PLAIN：明文密码传输、危险
+       DIGEST-MD5：基于MD5,SASL默认方式,是方便和安全性结合最好的一种方式,客户端和服务端共享同一个密钥,密钥不通过网络传输
+       GSSAPI：generic security service application program interface通用安全服务程序接口,kerberos是一种实现
+
+安全认证机制：
+   1、SASL Simple Authentication and Security Layer
+   2、JAAS,Java Authentication and Authorization service java认证和授权服务
+          认证通过插件的形式工作,可修改认证技术而不修改应用程序
+       公共类：Subject、Principle、Credentials票据
+      Jaas库中自带了一些认证机制,LDAP、Kerberos等
+
+      kerberos是通过传统的密码技术(如共享密钥)执行认证的,不依赖主机操作系统的认证,不基于主机地址的信任
+
+      KDC包括：认证服务和票据许可服务
+         用信用卡购买电影票,每次均需输入信用卡密码
+         改进：使用信用卡在通票售票处(即kerberos认证服务)购买通票(可看10场),使用通票去电影院购票处(kerberos票据许可服务)购买电影票(访问票据)
+             持票入场(服务器资源)看电影
+
+      hadoop选用kerberos,相比ssl(security sockets layer)
+          优点1：采用对称密钥,比ssl自带的基于公钥的算法要高效
+          优点2：用户管理简单,依赖第三方的统一管理中心-kdc,管理员对用户的操作在kdc上,相比ssl中基于广播的机制简单(撤销权限,需要重新生成
+            一个证书撤销列表,并广播给各个服务器)
+
+Hadoop安全机制：
+   RPC、HDFS、MapReduce引入了安全机制
+   1、RPC
+     1>  身份认证机制,除namenode外其他服务仅支持kerberos认证
+          Sasl本身不含认证,需用户指定第三方实现,而Hadoop将Kerberos和DOGEST-MD5两种机制添加到RPC实现了RPC安全认证
+     2>  服务访问机制,通过授权的客户端才能访问对应的服务,如管理员只允许若干用户/用户组向Hadoop提交作业
+         通过控制各个服务之间的通信协议实现,通常发生在其他访问控制之前,如文件权限检查,队列权限检查等
+         需在core-site.xml中配置hadoop.security.authorization=true
+
+yarn工作流程
+     1、用户向yarn提交程序,包括ApplicationMaster程序、启动am的命令、用户程序等
+     2、rm为该程序分配第一个container,并与对应的nodeManager通信,要求nm在container中启动应用程序的Am
+     3、am启动后向rm注册,用户可通过rm查看所有程序的运行状态,然后他为各个人物申请资源,并监控运行状态直到运行结束
+     4、am轮询通过rpc向rm申请和领取资源
+     5、am申请到资源后与对应nm通信,要求其启动任务
+     6、nm为任务设置好运行环境(环境变量、jar包、二进制程序),将任务启动命令写到一个脚本、通过运行该脚本启动任务
+     7、各个任务通过rpc协议向am汇报自己的状态和进度,让am随时掌握各任务状态,从而可以在任务失败时重启启动任务
+     8、程序完成后,am向rm注销,并关闭自己
+
+yarn：
+   软件设计方面：
+      1、基于服务的对象管理模型
+         生命周期较长的对象,采用基于服务的对象管理,被服务化的对象分：NOTINITED/INITED/STARTED/STOPED
+      2、基于事件驱动的并发模型
+         各种处理逻辑抽象成事件和事件调度器
+      3、基于真实资源需求量的调度模型
+         MR1基于slot,yarn基于真实资源需求
+         MR1中优先级只有5种,yarn可以是任意正数,越小优先级越高
+
+yarn中reduce启动时机由下列参数控制
+mapreduce. job.reduce.slowstart.completedmaps：当Map Task完成的比例达到该值后才会为Reduce Task申请资源，默认是0.05。
+yarn. app.mapreduce.am.job.reduce.rampup.limit：在Map Task完成前，最多启动的ReduceTask比例，默认为0.5。
+yarn. app.mapreduce.am.job.reduce.preemption.limit：当Map Task需要资源但暂时无法获取资源（比如Reduce Task运行过程中，部分Map Task因结果丢失需重算）时，为了保证至少一个Map Task可以得到资源，最多可以抢占的Reduce Task比例，默认为0.5。
+
+
+
+
