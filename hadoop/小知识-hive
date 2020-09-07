@@ -1,0 +1,55 @@
+hive查询在hive中的执行过程。
+
+   1、Driver接受命令。
+   2、org.apache.hadoop.hive.ql.HiveDriverRunHook.preDriverRun() 读取hive.exec.pre.hooks决定要运行的pre-hooks 。
+   3、org.apache.hadoop.hive.ql.Driver.compile()通过创建代表该查询的抽象语法树(AST)来开始处理查询。
+   4、org.apache.hadoop.hive.ql.parse.AbstractSemanticAnalyzerHook实现了HiveSemanticAnalyzerHook，调用preAnalyze() 方法。
+   5、对抽象语法树（AST）执行语义分析。
+   6、org.apache.hadoop.hive.ql.parse.AbstractSemanticAnalyzerHook.postAnalyze()会被调用，它执行所有配置的语义分析hooks。
+   7、创建并验证物理查询计划。
+   8、Driver.execute() 已经准备好开始运行job
+   9、调用org.apache.hadoop.hive.ql.hooks.ExecuteWithHookContext.run() 方法去执行所有的 pre-execution hooks。
+   10、org.apache.hadoop.hive.ql.hooks.ExecDriver.execute()执行该query的所有jobs
+   11、对于每个job都会执行org.apache.hadoop.hive.ql.stats.ClientStatsPublisher.run()，来为每个job发布统计信息。该间隔是由hive.exec.counters.pull.interval配置控制，默认是1000ms。hive.client.stats.publishers配置决定着运行的publishers。也可以通过设置hive.client.stats.counters来决定发布哪些counters。
+   12、完成所有task。
+   13、（可选）如果任务失败，请调用hive.exec.failure.hooks配置的hooks。
+   14、通过堆所有 hive.exec.post.hooks指定的hooks执行ExecuteWithHookContext.run() 来运行post execution hooks。
+   15、org.apache.hadoop.hive.ql.HiveDriverRunHook.postDriverRun（）。请注意，这是在查询完成运行之后以及将结果返回给客户端之前运行的。
+   16、返回结果。
+
+Hive支持许多不同类型的Hook。 Hook接口是Hive中所有Hook的父接口。它是一个空接口，并通过以下特定hook的接口进行了扩展：
+
+   1. PreExecute和PostExecute将Hook接口扩展到Pre和Post执行hook。
+   2. ExecuteWithHookContext扩展Hook接口以将HookContext传递给hook。HookContext包含了hook可以使用的所有信息。 HookContext被传递给名称中包含“WithContext”的所有钩子。
+   3. HiveDriverRunHook扩展了Hook接口，在driver阶段运行，允许在Hive中自定义逻辑处理命令。
+   4. HiveSemanticAnalyzerHook扩展了Hook接口，允许插入自定义逻辑以进行查询的语义分析。它具有preAnalyze（）和postAnalyze（）方法，这些方法在Hive执行自己的语义分析之前和之后执行。
+   5. HiveSessionHook扩展了Hook接口以提供会话级hook。在启动新会话时调用hook。用hive.server2.session.hook配置它。
+   6. Hive 1.1添加了Query Redactor Hooks。它是一个抽象类，它实现了Hook接口，可以在将查询放入job.xml之前删除有关查询的敏感信息。可以通过设置hive.exec.query.redactor.hooks属性来配置此hook。
+
+
+hive源码中实现了一些hook，具体有以下几个例子：
+
+   1.driverTestHook是一个非常简单的HiveDriverRunHook，它打印你用于输出的命令。
+   2. PreExecutePrinter和PostExecutePrinter是pre 和 post hook的示例，它将参数打印到输出。
+   3. ATSHook是一个ExecuteWithHookContext，它将查询和计划信息推送到YARN timeline server。
+   4. EnforceReadOnlyTables是一个ExecuteWithHookContext，用于阻止修改只读表。
+   5. LineageLogger是一个ExecuteWithHookContext，它将查询的血统信息记录到日志文件中。 LineageInfo包含有关query血统的所有信息。
+   6. PostExecOrcFileDump是一个post=Execution hook，用于打印ORC文件信息。
+   7. PostExecTezSummaryPrinter是一个post-execution hook，可以打印Tez计数器的摘要。
+   8. UpdateInputAccessTimeHook是一个pre-execution hook，可在运行查询之前更新所有输入表的访问时间。
+
+add jar target/Hive-hook-example-1.0.jar;
+set hive.exec.pre.hooks=HiveExampleHook;
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,8 +1,18 @@
 package scala
 
+import scala.collection.mutable.ListBuffer
+
 object QuickSort {
 
   def main(args: Array[String]): Unit = {
+    val a = List(11,9,5,7,4,10,6)
+    val b = ListBuffer(10)
+    val c = ListBuffer(11,12)
+    val d = b.++(c)
+    val ints = qsort(a)
+    println(s"ints:${ints}")
+
+    println(s"d:${d}")
     testListMatch()
 
   }
@@ -25,8 +35,8 @@ object QuickSort {
   def qsort[T <% Ordered[T]] (list:List[T]):List[T] = {
     list match {
       case Nil => Nil
-      case ::(head, tl) => {
-        val (before, after) = tl.partition(x => x.< {head})
+      case ::(head, tail) => {
+        val (before, after) = tail.partition(x => x.< {head})
         qsort(before).++(qsort(after).::(head))
       }
     }

@@ -4,6 +4,7 @@ import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
 import scala.collection.script.Message
 
+
 object HListTest {
   def main(args: Array[String]): Unit = {
     type X[T <: TBool] = T#If[String,Int,Any]
@@ -47,12 +48,18 @@ object HListTest {
     //scala方法名以:结尾,采用右结合的方式
     val s = 1 #:: {println("hi")} #:: {println("bai")} #:: Stream.empty
     println(s"s --> ${s}")
-//    println(s(0),s(1),s(2))
+
+    println(s(0),s(1),s(2))
     println(s.toList)
     println(s"s --> ${s}")
 
     //斐波那契,如果内存放不下会出问题
-    val fibs = {def f(a:Int,b:Int):Stream[Int]=a#::f(b,a+b);f(0,1)}
+    val fibs = {def f(a:Int,b:Int):Stream[Int]={
+        println(s"fibs a:${a},b:${b}")
+        a#::f(b,a+b)
+      }
+      f(0,1)
+    }
     {fibs drop 3 take 5 toList}
     println(s"fibs --> ${fibs}")
 
@@ -61,6 +68,7 @@ object HListTest {
       override def foreach[U](f: Int => U): Unit = {
         def next(a:Int,b:Int):Unit = {
           f(a)
+          println(s"fibs2 a:${a},b:${b}")
           next(b,a+b)
         }
         next(0,1)
@@ -83,8 +91,9 @@ object HListTest {
 
     //集合默认是严格、串行的,通过view来延迟计算(force前置执行,与view相反)、par来并行计算
     val res1 = (1 to 1000) .par.foldLeft(0)(_+_)//看不出来有没有并行
-    val res2 = (1 to 1000).par.foldLeft(Set[String]()){
-      (set,value) => set + Thread.currentThread().toString();set
+    val res2 = (1 to 1000).par.foldLeft(mutable.Set[String]()){
+      (set,value) => set.add(Thread.currentThread().toString)
+      set
     }
     val res3 = (1 to 1000).par.map {
       x => Thread.currentThread().toString

@@ -1,0 +1,43 @@
+1、flink和storm同样是真实流计算,为什么flink比storm快呢?
+   首先,单单就数据计算来说,速度是一样的
+    1> 数据传输优化,分为进程间和进程内
+     进程间：一般包含shuffle过程,主要是序列化和网络传输
+            flink一般是两个TM之间的传输,由netty实现
+            storm一般是worker间传输,早期通过zeroMq实现,后来也改成了netty
+            flink有自己的一套序列化机制,做了很多优化
+     进程内：flink多个逻辑之间可通过chain机制,通过一个task处理多个算子,通过方法调用传参的形式传输数据
+           storm两个线程分别运行两个逻辑,通过共享队列传输数据
+           flink未chain在一起的算子,上游算子将计算结果序列化后存入内存,然后通过网络传给下游,下游反序列化后继续处理
+         chain在一起的算子在一个task内运行,通过对象的深拷贝来实现传输,如果使用env.getConfig().enableObjectReuse()
+         会把中间深拷贝的步骤都省略掉,必须确保下游function只有一种或者下游function不改对象内部的值,否则会有线程安全问题
+    2> 可靠性
+       storm使用ack机制保证数据可靠,flink使用基于chandy-lamport算法的checkpoint
+       storm的ack：spout每发一条数据,会产生一条ack信息给acker,bolt处理完该条数据也会发送ack信息给acker,acker收到所有信息
+     会回复spout一条ack信息。对于只有一个spout+bolt的拓扑来说,每发一条数据,就会传输3条ack信息
+       flink中checkpoint信息的发起者是jobManager,它是按时间来计算花销,用户可设置checkpoint频率,比如10s做一次。每次checkpoint
+     花销只有从source发往map的1条checkpoint(jobManager发出的checkpoint信息走的是控制流,与数据流无关)。与storm相比开销要低得多
+
+   总结：实际场景中有很多业务逻辑,会涉及到CPU、内存等问题对整体延迟的影响,flink有自己的一套内存管理机制,也给flink带来性能提升
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
