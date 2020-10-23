@@ -22,8 +22,10 @@
 
 
 
-
-
+异步IO：https://www.jianshu.com/p/d8f99d94b761
+flink checkpoint:存储operator的state数据
+flink barrier对齐：https://blog.csdn.net/weixin_32265569/article/details/108743084
+flink两阶段提交和一致性保障：https://mp.weixin.qq.com/s?__biz=MzU5MTc1NDUyOA==&mid=2247483818&idx=1&sn=8c7bf4d00e81d7635bfa26b78a78ebba&chksm=fe2b65e5c95cecf349d9819fe6c998359cb9a8695abbdf74e326adc0503c8f330a2d47182b63&scene=21#wechat_redirect
 
 
 

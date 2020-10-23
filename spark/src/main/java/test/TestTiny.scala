@@ -2,6 +2,8 @@ package test
 
 import java.io.{File, PrintWriter}
 
+import org.apache.calcite.sql.parser.SqlParser
+
 import scala.io.Source
 
 /**
@@ -13,4 +15,6 @@ object TestTiny {
         a.filter(x => x.equals("1")).foreach(println(_))
     }
     def wan():Unit = ???
+
+
 }
