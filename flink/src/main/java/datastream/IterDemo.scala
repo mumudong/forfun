@@ -9,9 +9,9 @@ import scala.util.Random
 import util.control.Breaks._
 case class People(name:String,age:Int,sex:String)
 object IterDemo {
-  private final val Bound = 200
+  private final val Bound = 20000
   def main(args: Array[String]): Unit = {
-    val env = StreamExecutionEnvironment.getExecutionEnvironment
+    val env = StreamExecutionEnvironment.createLocalEnvironmentWithWebUI()
     fibonacci(env)
   }
 

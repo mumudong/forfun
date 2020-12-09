@@ -16,6 +16,7 @@
         <encoding>UTF-8</encoding>
         <scala.version>2.12.8</scala.version>
         <scala.compat.version>2.12</scala.compat.version>
+        <flink.version>1.9.1</flink.version>
     </properties>
 
     <dependencies>
@@ -45,17 +46,17 @@
         <dependency>
             <groupId>org.apache.flink</groupId>
             <artifactId>flink-scala_${scala.compat.version}</artifactId>
-            <version>1.9.1</version>
+            <version>${flink.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.flink</groupId>
             <artifactId>flink-java</artifactId>
-            <version>1.9.1</version>
+            <version>${flink.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.flink</groupId>
             <artifactId>flink-streaming-scala_${scala.compat.version}</artifactId>
-            <version>1.9.1</version>
+            <version>${flink.version}</version>
         </dependency>
 
         <!--由于Flink Table接口中引入了Apache Calcite第三方库，会阻止Java虚拟机对用户的Classloaders进行垃圾回收，
@@ -64,7 +65,7 @@
         <dependency>
             <groupId>org.apache.flink</groupId>
             <artifactId>flink-table</artifactId>
-            <version>1.9.1</version>
+            <version>${flink.version}</version>
         </dependency>
 <!--        <dependency>-->
 <!--            <groupId>org.apache.flink</groupId>-->
@@ -74,29 +75,29 @@
         <dependency>
             <groupId>org.apache.flink</groupId>
             <artifactId>flink-table-api-scala-bridge_${scala.compat.version}</artifactId>
-            <version>1.9.1</version>
+            <version>${flink.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.flink</groupId>
             <artifactId>flink-table-planner_${scala.compat.version}</artifactId>
-            <version>1.9.1</version>
+            <version>${flink.version}</version>
         </dependency>
 
 
         <dependency>
             <groupId>org.apache.flink</groupId>
             <artifactId>flink-table-planner-blink_${scala.compat.version}</artifactId>
-            <version>1.9.1</version>
+            <version>${flink.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.flink</groupId>
             <artifactId>flink-table-common</artifactId>
-            <version>1.9.1</version>
+            <version>${flink.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.flink</groupId>
             <artifactId>flink-connector-kafka-0.11_${scala.compat.version}</artifactId>
-            <version>1.9.1</version>
+            <version>${flink.version}</version>
             <scope>compile</scope>
             <exclusions>
                 <exclusion>
@@ -112,6 +113,12 @@
                     <groupId>org.xerial.snappy</groupId>
                 </exclusion>
             </exclusions>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.flink</groupId>
+            <artifactId>flink-runtime-web_${scala.compat.version}</artifactId>
+            <version>${flink.version}</version>
         </dependency>
     </dependencies>
 

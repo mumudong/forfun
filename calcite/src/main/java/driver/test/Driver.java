@@ -38,6 +38,9 @@ public class Driver extends org.apache.calcite.jdbc.Driver {
                 return path.toString().endsWith("json");
             }).forEach(it->{
                 System.out.println("it --> " + it);
+                for(int i = 0;i < it.getNameCount();i++){
+                    System.out.println("path.getname-" + i + " : " + it.getName(i));
+                }
                 File file = it.getName(it.getNameCount()-1).toFile();
                 String filename = file.getName();
                 filename = filename.substring(0,filename.lastIndexOf("."));
