@@ -1,0 +1,6 @@
+中间操作 ：
+     无状态：map、peek、filter
+     有状态：distinct、sorted、limit、skip
+终结操作：
+      非短路：forEach、toArray、reduce、max、count
+      短路：anyMatch、allMatch、findAny
