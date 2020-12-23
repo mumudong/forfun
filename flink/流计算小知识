@@ -27,9 +27,49 @@ flink checkpoint:存储operator的state数据
 flink barrier对齐：https://blog.csdn.net/weixin_32265569/article/details/108743084
 flink两阶段提交和一致性保障：https://mp.weixin.qq.com/s?__biz=MzU5MTc1NDUyOA==&mid=2247483818&idx=1&sn=8c7bf4d00e81d7635bfa26b78a78ebba&chksm=fe2b65e5c95cecf349d9819fe6c998359cb9a8695abbdf74e326adc0503c8f330a2d47182b63&scene=21#wechat_redirect
 
+flink state:
+   managed state:
+     flink runtime托管,自动存储,自动恢复,自动伸缩,修改应用并行度时状态自动重新分布到多个实例
+     flink提供常用的数据结构,如ListState、MapState
+     适用绝大多数flink算子,通过集成Rich函数类或其他提供好的接口类
+     分为两种：下列两种状态由算子子任务维护状态存储,子任务建状态不能互相访问
+
+        keyed state:
+           应用在keyedStream上,每个key有自己的状态
+           创建和访问方式: keyed state可通过重写rich function接口,在里面通过runtimeContext创建和访问状态
+           横向扩展:状态随key自动在算子子任务上迁移
+           支持的数据结构:ValueState/ListState/MapState
+           使用方法：
+               State主要有三种实现:ValueState
+                                MapState
+                                AppendingState->ListState、ReducingState、AggregatingState
+        operator state:
+           应用在所有算子上,每个算子子任务(或者说算子实例)共享一个状态,流入该任务的数据可访问和更新该状态
+           创建和访问:operator state需要进一步实现checkpointedFunction接口
+           横向扩展:有多种状态重新分配的方式,1:均匀分配,2:所有状态合并再分发给每个实例
+           支持的数据结构:ListState/BroadcastState
+           使用方法：用途不如keyed state多,常用在source和sink中,用来保存流入数据的偏移量或对输出数据做缓存以保证exactly once
+               operator state主要有三种:ListState:按round ribon均匀分配到各算子子任务,每个算子得到整列表的一个子集
+                                      UnionListState:广播模式,整个列表传递给所有子任务
+                                      BroadcastState
 
 
+   raw state:
+     用户自己管理状态
+     数据结构byte[]
+     使用场景:已有算子和managed stage不够用时用户自定义算子
 
+window:
+    为什么mergewindow
+    session window:早期需用户做大量工作实现,新元素到达时基于时间戳注册定时间,并移除上一次的定时器,如果超时时间内还没有新元素到达,就会触发session window
+                但是这种方式无法处理乱序数据,flink 1.1.0之后通过sessionWindows.withGap()定义session window,且可处理乱序
+           底层原理:会为每个进入的元素分配一个窗口,以元素时间戳为起始,时间戳+会话超时时间为结束
+                  假如前两条数据进入两个不相交的窗口,当第三个元素进入,该窗口与前两个窗口相交,会进行合并
+                  合并内容: 窗口的底层状态的合并(窗口中缓存的数据,或对聚合窗口来说是一个聚合之)
+                          需要合并的窗口的trigger的合并(如对eventTime来说,会删除旧窗口注册的定时器,并注册新窗口的定时器)
+                  注意: 每进入一个新元素,都会分配一个该元素的窗口,检查合并现有窗口.触发窗口计算之前,每次都会检查窗口是否可以和其他窗口合并
+                       直到trigger触发后,将窗口从窗口列表溢出,对event time来说,触发是要大于窗口结束时间的watermark到达,
+                       watermark没到,窗口会一直缓存,基于此可实现对乱序消息的支持
 
 
 

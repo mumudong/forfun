@@ -1,0 +1,320 @@
+Netty是最初是由Jboss提供的一个Java开源框架，目前已独立发展。它基于 Java NIO开发，是通过异步非阻塞和事件驱动来实现的一个高性能、高可靠和高可定制化的通信框架。
+在AIO出现后，Netty也进行了尝试，但由于AIO的性能并未有本质提升，因此Netty在其4.0的其中一个版本中将AIO移除。
+aio出现较晚,本质也是基于poll或epoll,同步非阻塞,速度未有质的提升,因此使用较少
+
+
+空轮训：jdk的epoll实现有bug,即便select空仍然唤醒线程导致空轮训
+    实际上 Netty 并没有从根源上解决该问题，而是巧妙地规避了这个问题。
+    Netty 提供了一种检测机制判断线程是否可能陷入空轮询，具体的实现方式如下：
+    1、每次执行 Select 操作之前记录当前时间 currentTimeNanos。
+    2、time - TimeUnit.MILLISECONDS.toNanos(timeoutMillis) >= currentTimeNanos，如果事件轮询的持续时间大于等于 timeoutMillis，
+       那么说明是正常的，否则表明阻塞时间并未达到预期，可能触发了空轮询的 Bug。
+    3、Netty 引入了计数变量 selectCnt。在正常情况下，selectCnt 会重置，否则会对 selectCnt 自增计数。
+       当 selectCnt 达到 SELECTOR_AUTO_REBUILD_THRESHOLD（默认512） 阈值时，会触发重建 Selector 对象。
+    异常的 Selector 中所有的 SelectionKey 会重新注册到新建的 Selector 上，重建完成之后异常的 Selector 就可以废弃了。
+
+代码可见nioEventLoop run方法
+NioEventLoop 不仅负责处理 I/O 事件，还要兼顾执行任务队列中的任务。任务队列遵循 FIFO 规则，可以保证任务执行的公平性。NioEventLoop 处理的任务类型基本可以分为三类。
+   1、普通任务：通过 NioEventLoop 的 execute() 方法向任务队列 taskQueue 中添加任务。
+      Netty 在写数据时会封装 WriteAndFlushTask 提交给 taskQueue。taskQueue 的实现类是多生产者单消费者队列 MpscChunkedArrayQueue，在多线程并发添加任务时，可以保证线程安全。
+   2、定时任务：通过调用 NioEventLoop 的 schedule() 方法向定时任务队列 scheduledTaskQueue 添加一个定时任务，用于周期性执行该任务。
+      例如，心跳消息发送等。定时任务队列 scheduledTaskQueue 采用优先队列 PriorityQueue 实现。
+   3、尾部队列：tailTasks 相比于普通任务队列优先级较低，在每次执行完 taskQueue 中任务后会去获取尾部队列中任务执行。
+      尾部任务并不常用，主要用于做一些收尾工作，例如统计事件循环的执行时间、监控信息上报等。
+    见runAllTasks()
+    fetchFromScheduledTaskQueue 函数：将定时任务从 scheduledTaskQueue 中取出，聚合放入普通任务队列 taskQueue 中，只有定时任务的截止时间小于当前时间才可以被合并。
+    从普通任务队列 taskQueue 中取出任务。
+    计算任务执行的最大超时时间。
+    safeExecute 函数：安全执行任务，实际直接调用的 Runnable 的 run() 方法。
+    每执行 64 个任务进行超时时间的检查，如果执行时间大于最大超时时间，则立即停止执行任务，避免影响下一轮的 I/O 事件的处理。
+    最后获取尾部队列中的任务执行。
+
+EventLoop 最佳实践
+   1、网络连接建立过程中三次握手、安全认证的过程会消耗不少时间。这里建议采用 Boss 和 Worker 两个 EventLoopGroup，有助于分担 Reactor 线程的压力。
+   2、由于 Reactor 线程模式适合处理耗时短的任务场景，对于耗时较长的 ChannelHandler 可以考虑维护一个业务线程池，将编解码后的数据封装成 Task 进行异步处理，
+      避免 ChannelHandler 阻塞而造成 EventLoop 不可用。
+   3、如果业务逻辑执行时间较短，建议直接在 ChannelHandler 中执行。例如编解码操作，这样可以避免过度设计而造成架构的复杂性。
+   4、不宜设计过多的 ChannelHandler。对于系统性能和可维护性都会存在问题，在设计业务架构的时候，需要明确业务分层和 Netty 分层之间的界限。
+      不要一味地将业务逻辑都添加到 ChannelHandler 中。
+
+   MainReactor 线程：处理客户端请求接入。
+   SubReactor 线程：数据读取、I/O 事件的分发与执行。
+   任务处理线程：用于执行普通任务或者定时任务，如空闲连接检测、心跳上报等。
+
+channelPipeline
+    ChannelPipeline 的双向链表分别维护了 HeadContext 和 TailContext 的头尾节点。我们自定义的 ChannelHandler 会插入到 Head 和 Tail 之间，
+    这两个节点在 Netty 中已经默认实现了，它们在 ChannelPipeline 中起到了至关重要的作用。
+
+    实际上 ChannelPipeline 维护的是与 ChannelHandlerContext 的关系。
+
+    HeadContext 既是 Inbound 处理器，也是 Outbound 处理器。它分别实现了 ChannelInboundHandler 和 ChannelOutboundHandler。
+    网络数据写入操作的入口就是由 HeadContext 节点完成的。HeadContext 作为 Pipeline 的头结点负责读取数据并开始传递 InBound 事件，当数据处理完成后，数据会反方向经过 Outbound 处理器，最终传递到 HeadContext，所以 HeadContext 又是处理 Outbound 事件的最后一站。此外 HeadContext 在传递事件之前，还会执行一些前置操作。
+
+    TailContext 只实现了 ChannelInboundHandler 接口。它会在 ChannelInboundHandler 调用链路的最后一步执行，主要用于终止 Inbound 事件传播，
+    例如释放 Message 数据资源等。TailContext 节点作为 OutBound 事件传播的第一站，仅仅是将 OutBound 事件传递给上一个节点。
+
+    ctx.fireExceptionCaugh 会将异常按顺序从 Head 节点传播到 Tail 节点。如果用户没有对异常进行拦截处理，最后将由 Tail 节点统一处理
+    TailContext onUnhandledInboundException
+
+    自定义异常处理,放入
+    public class ExceptionHandler extends ChannelDuplexHandler {
+        @Override
+        public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
+            if (cause instanceof RuntimeException) {
+                System.out.println("Handle Business Exception Success.");
+            }
+        }
+    }
+
+粘包、拆包
+    如果每次请求的网络包数据都很小，一共请求了 10000 次，TCP 并不会分别发送 10000 次。因为 TCP 采用的 Nagle 算法对此作出了优化
+
+     在网络通信的过程中，每次可以发送的数据包大小是受多种因素限制的，如 MTU 传输单元大小、MSS 最大分段大小、滑动窗口等。
+     如果一次传输的网络包数据大小超过传输单元大小，那么我们的数据可能会拆分为多个数据包发送出去。
+
+     MTU（Maxitum Transmission Unit） 是链路层一次最大传输数据的大小。MTU 一般来说大小为 1500 byte
+     MSS（Maximum Segement Size） 是指 TCP 最大报文段长度，它是传输层一次发送最大数据的大小。
+     如果 MSS + TCP 首部 + IP 首部 + MAC首部> MTU，那么数据包将会被拆分为多个发送
+
+     滑动窗口是 TCP 传输层用于流量控制的一种有效措施，也被称为通告窗口。
+     滑动窗口是数据接收方设置的窗口大小，随后接收方会把窗口大小告诉发送方，以此限制发送方每次发送数据的大小，从而达到流量控制的目的。
+     这样数据发送方不需要每发送一组数据就阻塞等待接收方确认，允许发送方同时发送多个数据分组，每次发送的数据都会被限制在窗口大小内。
+
+     Nagle 算法可以理解为批量发送，也是我们平时编程中经常用到的优化思路，它是在数据未得到确认之前先写入缓冲区，等待数据确认或者缓冲区积攒到一定大小再把数据包发送出去。
+
+     Linux 在默认情况下是开启 Nagle 算法的，在大量小数据包的场景下可以有效地降低网络开销。
+     但如果你的业务场景每次发送的数据都需要获得及时响应，那么 Nagle 算法就不能满足你的需求了，因为 Nagle 算法会有一定的数据延迟。
+     你可以通过 Linux 提供的 TCP_NODELAY 参数禁用 Nagle 算法。
+     Netty 中为了使数据传输延迟最小化，就默认禁用了 Nagle 算法，这一点与 Linux 操作系统的默认行为是相反的。
+
+     所以需要提供一种机制来识别数据包的界限，这也是解决拆包/粘包的唯一方法：定义应用层的通信协议。下面我们一起看下主流协议的解决方案。
+        1、消息长度固定   当发送方的数据小于固定长度时，则需要空位补齐。
+               缺点也非常明显，无法很好设定固定长度的值，如果长度太大会造成字节浪费，长度太小又会影响消息传输
+        2、特定分隔符
+          比较推荐的做法是将消息进行编码，例如 base64 编码，然后可以选择 64 个编码字符之外的字符作为特定分隔符。
+          特定分隔符法在消息协议足够简单的场景下比较高效，例如大名鼎鼎的 Redis 在通信过程中采用的就是换行分隔符。
+        3、消息长度 + 消息内容
+           消息长度 + 消息内容是项目开发中最常用的一种协议
+           消息长度 + 消息内容的使用方式非常灵活，且不会存在消息定长法和特定分隔符法的明显缺陷。
+           当然在消息头中不仅只限于存放消息的长度，而且可以自定义其他必要的扩展字段，例如消息版本、算法类型等等。
+
+协议：
+     通用协议兼容性好，易于维护，各种异构系统之间可以实现无缝对接。如果在满足业务场景以及性能需求的前提下，推荐采用通用协议的方案。相比通用协议，自定义协议主要有以下优点。
+     极致性能：通用的通信协议考虑了很多兼容性的因素，必然在性能方面有所损失。
+     扩展性：自定义的协议相比通用协议更好扩展，可以更好地满足自己的业务需求。
+     安全性：通用协议是公开的，很多漏洞已经很多被黑客攻破。自定义协议更加安全，因为黑客需要先破解你的协议内容。
+
+     完备的网络协议需具备：
+       1、魔数：
+             魔数的作用是防止任何人随便向服务器的端口上发送数据。服务端在接收到数据时会解析出前几个固定字节的魔数，然后做正确性比对。
+             如果和约定的魔数不匹配，则认为是非法数据，可以直接关闭连接或者采取其他措施以增强系统的安全防护。
+       2、协议版本号
+             随着业务需求的变化，协议可能需要对结构或字段进行改动，不同版本的协议对应的解析方法也是不同的。所以在生产级项目中强烈建议预留协议版本号这个字段。
+       3、序列化算法
+             序列化算法字段表示数据发送方应该采用何种方法将请求的对象转化为二进制，以及如何再将二进制转化为对象，如 JSON、Hessian、Java 自带序列化等。
+       4、报文类型
+             在不同的业务场景中，报文可能存在不同的类型。例如在 RPC 框架中有请求、响应、心跳等类型的报文，在 IM 即时通信的场景中有登陆、创建群聊、发送消息、接收消息、退出群聊等类型的报文。
+       5、长度域字段
+             长度域字段代表请求数据的长度，接收方根据长度域字段获取一个完整的报文。
+       6、请求数据
+             请求数据通常为序列化之后得到的二进制流，每种请求数据的内容是不一样的。
+       7、状态
+             状态字段用于标识请求是否正常。一般由被调用方设置。例如一次 RPC 调用失败，状态字段可被服务提供方设置为异常状态。
+       8、保留字段
+             保留字段是可选项，为了应对协议升级的可能性，可以预留若干字节的保留字段，以备不时之需
+
+
+netty自定义通信协议：
+        Netty 常用编码器类型：
+             MessageToByteEncoder 对象编码成字节流；
+             MessageToMessageEncoder 一种消息类型编码成另外一种消息类型。
+        Netty 常用解码器类型：
+        ByteToMessageDecoder/ReplayingDecoder 将字节流解码为消息对象；
+        MessageToMessageDecoder 将一种消息类型解码为另外一种消息类型。
+
+        编解码器可以分为一次解码器和二次解码器，一次解码器用于解决 TCP 拆包/粘包问题，按协议解析后得到的字节数据。
+        如果你需要对解析后的字节数据做对象模型的转换，这时候便需要用到二次解码器，同理编码器的过程是反过来的。
+
+        一次编解码器：MessageToByteEncoder/ByteToMessageDecoder。
+        二次编解码器：MessageToMessageEncoder/MessageToMessageDecoder。
+
+        MessageToByteEncoder 用于将对象编码成字节流，MessageToByteEncoder 提供了唯一的 encode 抽象方法，我们只需要实现encode 方法即可完成自定义编码。
+        MessageToByteEncoder 重写了 ChanneOutboundHandler 的 write() 方法
+        编码器实现非常简单，不需要关注拆包/粘包问题。如下例子，展示了如何将字符串类型的数据写入到 ByteBuf 实例，ByteBuf 实例将传递给 ChannelPipeline 链表中的下一个 ChannelOutboundHandler。
+        public class StringToByteEncoder extends MessageToByteEncoder<String> {
+                @Override
+                protected void encode(ChannelHandlerContext channelHandlerContext, String data, ByteBuf byteBuf) throws Exception {
+                    byteBuf.writeBytes(data.getBytes());
+                }
+        }
+
+        MessageToMessageEncoder 是将一种格式的消息转换为另外一种格式的消息。其中第二个 Message 所指的可以是任意一个对象，如果该对象是 ByteBuf 类型，那么基本上和 MessageToByteEncoder 的实现原理是一致的。
+        此外 MessageToByteEncoder 的输出结果是对象列表，编码后的结果属于中间对象，最终仍然会转化成 ByteBuf 进行传输。
+        以 StringEncoder 为例看下 MessageToMessageEncoder 的用法。
+        @Override
+        protected void encode(ChannelHandlerContext ctx, CharSequence msg, List<Object> out) throws Exception {
+            if (msg.length() == 0) {
+                return;
+            }
+            out.add(ByteBufUtil.encodeString(ctx.alloc(), CharBuffer.wrap(msg), charset));
+        }
+
+        解码类是 ChanneInboundHandler 的抽象类实现，操作的是 Inbound 入站数据。解码器实现的难度要远大于编码器，
+        因为解码器需要考虑拆包/粘包问题。由于接收方有可能没有接收到完整的消息，所以编码框架需要对入站的数据做缓冲操作，直至获取到完整的消息。
+
+        public abstract class ByteToMessageDecoder extends ChannelInboundHandlerAdapter {
+            //decode处理接收的数据,重复调用至没有新的完整报文,或byteBuf没有更多可读数据为止,若out不为空,在channelPipeLine继续传递
+            protected abstract void decode(ChannelHandlerContext ctx, ByteBuf in, List<Object> out) throws Exception;
+            //在channel关闭时调用,主要用以处理剩余的字节数
+            protected void decodeLast(ChannelHandlerContext ctx, ByteBuf in, List<Object> out) throws Exception {
+                if (in.isReadable()) {
+                    decodeRemovalReentryProtection(ctx, in, out);
+                }
+            }
+        }
+
+        MessageToMessageDecoder 与 ByteToMessageDecoder 作用类似，都是将一种消息类型的编码成另外一种消息类型。
+        与 ByteToMessageDecoder 不同的是 MessageToMessageDecoder 并不会对数据报文进行缓存，它主要用作转换消息模型。
+        比较推荐的做法是使用 ByteToMessageDecoder 解析 TCP 协议，解决拆包/粘包问题。
+        解析得到有效的 ByteBuf 数据，然后传递给后续的 MessageToMessageDecoder 做数据对象的转换，具体流程如下图所示。
+
+        开源消息中间件 RocketMQ 就是使用 LengthFieldBasedFrameDecoder 进行解码的
+
+
+堆外内存：
+    1、堆内内存由 JVM GC 自动回收内存，降低了 Java 用户的使用心智，但是 GC 是需要时间开销成本的，堆外内存由于不受 JVM 管理，
+      所以在一定程度上可以降低 GC 对应用运行时带来的影响。
+    2、堆外内存需要手动释放，这一点跟 C/C++ 很像，稍有不慎就会造成应用程序内存泄漏，
+       当出现内存泄漏问题时排查起来会相对困难。
+    3、当进行网络 I/O 操作、文件读写时，堆内内存都需要转换为堆外内存，然后再与底层设备进行交互，
+        这一点在介绍 writeAndFlush 的工作原理中也有提到，所以直接使用堆外内存可以减少一次内存拷贝。
+    4、堆外内存可以实现进程之间、JVM 多实例之间的数据共享。
+    由此可以看出，如果你想实现高效的 I/O 操作、缓存常用的对象、降低 JVM GC 压力，堆外内存是一个非常不错的选择。
+
+    Java 中堆外内存的分配方式有两种：
+      ByteBuffer#allocateDirect
+      Unsafe#allocateMemory。
+
+ByteBuf:
+     nio中ByteBuffer四个指针: mark <= position <= limit <= capacity
+     缺点：
+        1、byteBuffer不能动态扩缩容
+        2、读写共用position,需要频繁flip、rewind
+     ByteBuf: 三个指针readIndex <= writeIndex <= maxCapacity
+        1、动态扩缩容
+        2、读写采用不同指针
+        3、内置复合缓存类型可实现零拷贝
+        4、支持缓存池、支持引用计数
+      引用计数对byteBuf设计缓存池化有帮助,当引用计数为0,会被放入对象池,避免重复创建
+      netty可利用引用计数的特点实现内存泄漏检测,jvm并不知道netty引用计数如何实现,当byteBuf对象不可达时一样会被回收。但是如果此时
+    引用计数不为0,那么该对象就不会被释放或者被放入对象池,从而发生了内存泄漏,netty会对ByteBuf抽样分析,检测是否已经不可达且引用计数大于0,
+    并打印泄漏位置,关注日志中LEAK关键字
+
+    ByteBuf实现方式
+    Heap/Direct 就是堆内和堆外内存。
+        Heap 指的是在 JVM 堆内分配，底层依赖的是字节数据；
+        Direct 则是堆外内存，不受 JVM 限制，分配方式依赖 JDK 底层的 ByteBuffer。
+    Pooled/Unpooled 表示池化还是非池化内存。
+        Pooled 是从预先分配好的内存中取出，使用完可以放回 ByteBuf 内存池，等待下一次分配。
+        Unpooled 是直接调用系统 API 去申请内存，确保能够被 JVM GC 管理回收。
+    Unsafe/非 Unsafe 的区别在于操作方式是否安全。
+        Unsafe 表示每次调用 JDK 的 Unsafe 对象操作物理内存，依赖 offset + index 的方式操作数据。
+        Unsafe 则不需要依赖 JDK 的 Unsafe 对象，直接通过数组下标的方式操作数据
+
+动态内存分配:
+       内存碎片：
+           内部碎片：linux物理内存内存页page是4K大小,物理内存分配回收基于page,page内的碎片成为内部碎片
+                 需要1K,分配一个page,剩下的3K就是内部碎片
+           外部碎片：page之间的碎片为外部碎片
+                 分配较大内存时只能分配连续page,page不断分配和回收,page之间会出现空闲的page,即外部碎片
+      （Dynamic memory allocation）又称为堆内存分配，后面简称 DMA
+      DMA是从一整块内存中按需分配,分配出的内存会记录元数据,同时还会使用空闲分区链维护空闲内存,便于在内存分配时查找可用空闲分区
+      常用的3种查找策略：
+         1、首次适应算法：空闲内存链 地址：剩余空间--->地址：剩余空间 ---> ...
+             空闲分区链以地址递增的顺序将空闲分区以双向链表连接,从链中中岛第一个满足分配条件的空闲分区,
+           该算法每次从低地址开始,造成低地址部分不断被分配,也会产生很多小的空闲分区
+         2、循环首次适应算法：
+             每次从上次找到的空闲分区的下一个空闲分区开始查找,该算法比首次适应算法空闲分区的分布更均匀,查找效率有所提升,
+           但会造成链中空闲分区越来越少
+         3、最佳适应算法：
+             空闲分区链以空闲大小递增的顺序连接在一起,选择第一个满足分配条件的分区就是最优的,
+           该算法空间利用率高,但会留下较多难利用的小分区,且每次分配完要重新排序,会有性能损耗
+
+      伙伴算法：以page为最小管理单位,不适合小内存分配
+          采用分离适配思想,将物理内存按2的次幂划分,分配时按2的次幂按需分配,如4KB、8KB、16KB等,如请求10KB会分配16KB
+          该算法将内存划分为11组不通的2次幂的内存组合,每组内按双向链表连接,如2的0次幂个连续page,2的1次幂连续page
+          如分配10K大小内存块,分配过程如下：
+             找到存储2的4次幂的page对应链表
+             查找链表中是否有空闲内存块,有则分配
+             如果没有空闲,则向上查找2的5次幂,若有空闲内存块,取出将其分割为2个2的4次幂,其中一个分配给进程,另一个放入2的4次幂对应链表
+          释放内存：
+             进程用完内存归还时,需要检查去伙伴块的内存是否释放,伙伴块是大小相同,地址连续的,低地址块起始地址为2的整数次幂
+             如果伙伴空闲,将两个内存块合并成更大的块,重复执行上述伙伴检查机制,直至伙伴块非空闲,那么将该内存块放入实际大小对应链表
+             频繁的合并会造成CPU浪费,所以不是每次释放都会触发合并,链表中内存个数小于某个阈值时不会触发
+             伙伴算法有效减少外部碎片,但是内部碎片严重,最严重会有50%内存碎片
+      SLAB算法：
+           采用内存池方案,解决内部碎片问题
+           linux内核使用的就是slab算法
+
+netty内存划分：
+      内存分配时采用伙伴算法
+      poolChunk:16M,当分配大于16M内存时采用非池化分配chunk
+      page:8K
+      poolSubpage:使用bitmap记录子内存是否被使用。分配小于8K内存时采用
+
+      PoolThreadCache将不同规格tiny、small、normal类型的内存使用单独的memoryRegionCache数组维护,数组长度为规格的数据量
+       三种规格数量分别为32、4、3
+       small：512B,1K,2K,4K
+       normal:8K,16K,32K
+
+netty内存分配原理：
+       负责线程分配组件：
+          poolArena：多线程共享,每个线程绑定一个poolArena
+                 内存单位是poolChunk,每个poolChunk通过伙伴算法管理page,划分为2048个8K的page,以满2叉树维护page,申请内存大于8K是以page为单位划分,小于8K时以poolSubpage管理的更小粒度分配
+          poolThreadCache：每个线程私有
+
+       大于16M时,不会经过poolThreadCache
+       分配内存大于 8K 时，PoolChunk 中采用的 Page 级别的内存分配策略。
+       分配内存小于 8K 时，由 PoolSubpage 负责管理的内存分配策略。
+       分配内存小于 8K 时，为了提高内存分配效率,使用完内存不会立即归还给poolChunk,由 PoolThreadCache 本地线程缓存提供的内存分配。
+
+Recycle对象池：
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -14,7 +14,7 @@ public class EchoClientHandler extends SimpleChannelInboundHandler<ByteBuf> {
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
         System.out.println("client channelActive..");
-        ctx.writeAndFlush(Unpooled.copiedBuffer("Netty rocks!", CharsetUtil.UTF_8)); // 必须有flush
+        ctx.writeAndFlush(Unpooled.copiedBuffer("12345Netty rocks!", CharsetUtil.UTF_8)); // 必须有flush
 
         // 必须存在flush
         // ctx.write(Unpooled.copiedBuffer("Netty rocks!", CharsetUtil.UTF_8));

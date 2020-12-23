@@ -12,7 +12,39 @@ import java.util.Iterator;
 import java.util.Vector;
 /**
  * Created by Administrator on 2018/8/31.
+ *
+ *
+ *当向通道中注册SelectionKey.OP_READ事件后，如果客户端有向缓存中write数据，下次轮询时，则会 isReadable()=true；
+ *当向通道中注册SelectionKey.OP_WRITE事件后，这时你会发现当前轮询线程中isWritable()一直为ture，如果不设置为其他事件
+ *
+ * 注意：写事件很容易满足，就是操作系统给对应socket分配的缓冲区还有空闲,一般情况都满足
+ * key.interestOps(SelectionKey.OP_READ)相当于给通道注册读事件,等价取消key关联通道对写事件感兴趣,一个key目前
+ * 只能对一个事件感兴趣,如果不取消对写事件感兴趣，写事件会不断被触发
+ *
+ * 要点一：不推荐直接写channel，而是通过缓存和attachment传入要写的数据，改变interestOps()来写数据；
+ * 要点二：每个channel只对应一个SelectionKey，所以，只能改变interestOps()，不能register()和cancel()。
+ *
+ *buffer ： capacity、position、limit
+ *         position：当前读写指针位置
+ *         limit：写模式下标识最多能写多少数据=capacity
+ *                读模式下能赌多少=缓存中实际数据大小
+ *                写模式下调用flip：limit设为position，即当前写了多少数据
+ *                                position设为0，以表示读操作从缓存头开始
+ *
+ *BossEventLoopGroup 和 WorkerEventLoopGroup 包含一个或者多个 NioEventLoop。BossEventLoopGroup 负责监听客户端的 Accept 事件，
+ * 当事件触发时，将事件注册至 WorkerEventLoopGroup 中的一个 NioEventLoop 上。每新建一个 Channel， 只选择一个 NioEventLoop 与其绑定。
+ * 所以说 Channel 生命周期的所有事件处理都是线程独立的，不同的 NioEventLoop 线程之间不会发生任何交集。
+ *
+ *NioEventLoop 完成数据读取后，会调用绑定的 ChannelPipeline 进行事件传播，ChannelPipeline 也是线程安全的，数据会被传递到 ChannelPipeline 的第一个 ChannelHandler 中。
+ *
+ *
+ *
  */
+
+// NioEventLoop 无锁串行化的设计不仅使系统吞吐量达到最大化，而且降低了用户开发业务逻辑的难度，不需要花太多精力关心线程安全问题。
+// 虽然单线程执行避免了线程切换，但是它的缺陷就是不能执行时间过长的 I/O 操作，一旦某个 I/O 事件发生阻塞，
+// 那么后续的所有 I/O 事件都无法执行，甚至造成事件积压。在使用 Netty 进行程序开发时，我们一定要对 ChannelHandler 的实现逻辑有充分的风险意识。
+
 public class ChatServer implements Runnable{
     //选择器
     private Selector selector;
@@ -65,6 +97,7 @@ public class ChatServer implements Runnable{
             //轮询选择器选择键
             while (isRun) {
                 //选择一组已准备进行IO操作的通道的key，等于1时表示有这样的key
+                //select会将就绪的事件放入selectedKeys中,不会自己删除,所以下面处理数据时需要清理处理过的事件
                 int n = selector.select();
                 if (n > 0) {
                     //从选择器上获取已选择的key的集合并进行迭代

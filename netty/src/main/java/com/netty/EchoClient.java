@@ -54,6 +54,6 @@ public class EchoClient {
     }
 
     public static void main(String[] args) throws Exception {
-        new EchoClient("127.0.0.1", 65535).start(); // 连接127.0.0.1/65535，并启动
+        new EchoClient("127.0.0.1", 8088).start(); // 连接127.0.0.1/65535，并启动
     }
 }

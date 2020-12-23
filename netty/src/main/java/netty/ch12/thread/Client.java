@@ -9,7 +9,7 @@ import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.codec.FixedLengthFrameDecoder;
 
-import static com.imooc.netty.ch12.thread.Constant.PORT;
+import static netty.ch12.thread.Constant.PORT;
 
 public class Client {
 
