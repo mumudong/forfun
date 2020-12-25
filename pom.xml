@@ -24,6 +24,7 @@
 <!--        <module>web/sso/zuul</module>-->
         <module>calcite</module>
         <module>calcite-test</module>
+        <module>canal</module>
     </modules>
 
     <name>forfun</name>

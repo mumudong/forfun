@@ -3,6 +3,7 @@ package netty.ch2;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.Socket;
+import java.net.SocketException;
 
 public class ClientHandler {
 
@@ -11,6 +12,12 @@ public class ClientHandler {
 
     public ClientHandler(Socket socket) {
         this.socket = socket;
+        try {
+            socket.setKeepAlive(true);
+            socket.setSoLinger(true,2);
+        } catch (SocketException e) {
+            e.printStackTrace();
+        }
     }
 
     public void start() {
@@ -27,14 +34,18 @@ public class ClientHandler {
         try {
             InputStream inputStream = socket.getInputStream();
             while (true) {
-                byte[] data = new byte[MAX_DATA_LEN];
-                int len;
-                while ((len = inputStream.read(data)) != -1) {
-                    String message = new String(data, 0, len);
-                    System.out.println("客户端传来消息: " + message);
-                    socket.getOutputStream().write(data);
+//                byte[] data = new byte[MAX_DATA_LEN];
+//                int len;
+//                while ((len = inputStream.read(data)) != -1) {
+//                    String message = new String(data, 0, len);
+//                    System.out.println("客户端传来消息: " + message);
+//                    socket.getOutputStream().write(data);
+//                }
+                try {
+                    Thread.sleep(5000L);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
                 }
-
             }
 
 
