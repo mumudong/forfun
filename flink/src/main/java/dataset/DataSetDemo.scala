@@ -30,7 +30,7 @@ object DataSetDemo {
 
   def rangeTest(env:ExecutionEnvironment):Unit = {
     import org.apache.flink.api.scala._
-    val data = env.fromElements(WordCountData.NUMS:_*).setParallelism(2)
+    val data = env.fromElements(mumu.WordCountData.NUMS:_*).setParallelism(2)
 //    val rangeData = data.partitionByRange(x => x._1)
 //      .mapPartition(nums => {
 //        val p = Random.nextInt(100)
