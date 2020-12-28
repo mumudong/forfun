@@ -1,3 +1,20 @@
+对于一个canal server，基础的框架包括以下几个部分：MetaManager、EventParser、EventSink和EventStore。
+    其中EventParser的作用就是发送dump命令，从mysql数据库获取binlog文件。
+    发送dump命令，可以指定时间戳或者position，从指定的时间或者位置开始dump
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 mysql主从同步:
     1、在备库 B 上通过 change master 命令，设置主库 A 的 IP、端口、用户名、密码，
        以及要从哪个位置开始请求 binlog，这个位置包含文件名和日志偏移量。

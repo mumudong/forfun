@@ -12,6 +12,7 @@
     <artifactId>hadoop</artifactId>
 
     <properties>
+        <hbase.version>2.1.0</hbase.version>
         <hive.version>3.1.0</hive.version>
     </properties>
     <dependencies>
@@ -29,7 +30,7 @@
         <dependency>
             <groupId>org.apache.hbase</groupId>
             <artifactId>hbase-client</artifactId>
-            <version>1.1.2</version>
+            <version>${hbase.version}</version>
             <exclusions>
                 <exclusion>
                     <artifactId>hadoop-mapreduce-client-core</artifactId>
@@ -56,7 +57,7 @@
         <dependency>
             <groupId>org.apache.hbase</groupId>
             <artifactId>hbase-server</artifactId>
-            <version>1.1.2</version>
+            <version>${hbase.version}</version>
             <exclusions>
                 <exclusion>
                     <artifactId>servlet-api-2.5</artifactId>
@@ -192,7 +193,7 @@
         <dependency>
             <groupId>org.apache.hbase</groupId>
             <artifactId>hbase-common</artifactId>
-            <version>1.1.2</version>
+            <version>${hbase.version}</version>
             <exclusions>
                 <exclusion>
                     <artifactId>hadoop-mapreduce-client-core</artifactId>

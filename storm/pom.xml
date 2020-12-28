@@ -10,6 +10,9 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>storm</artifactId>
+    <properties>
+        <hbase.version>2.1.0</hbase.version>
+    </properties>
     <dependencies>
         <dependency>
             <groupId>org.apache.hadoop</groupId>
@@ -140,7 +143,7 @@
         <dependency>
             <groupId>org.apache.hbase</groupId>
             <artifactId>hbase-server</artifactId>
-            <version>1.1.2</version>
+            <version>${hbase.version}</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.slf4j</groupId>
@@ -159,7 +162,7 @@
         <dependency>
             <groupId>org.apache.hbase</groupId>
             <artifactId>hbase-client</artifactId>
-            <version>1.1.2</version>
+            <version>${hbase.version}</version>
             <exclusions>
                 <exclusion>
                     <artifactId>commons-logging</artifactId>

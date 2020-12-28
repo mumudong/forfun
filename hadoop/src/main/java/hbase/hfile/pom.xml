@@ -16,6 +16,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
+        <hbase.version>2.1.0</hbase.version>
     </properties>
 
     <dependencies>
@@ -86,7 +87,7 @@
         <dependency>
             <groupId>org.apache.hbase</groupId>
             <artifactId>hbase-client</artifactId>
-            <version>0.98.12-hadoop2</version>
+            <version>${hbase.version}</version>
             <exclusions>
                 <exclusion>
                     <artifactId>hadoop-annotations</artifactId>
@@ -109,7 +110,7 @@
         <dependency>
             <groupId>org.apache.hbase</groupId>
             <artifactId>hbase-server</artifactId>
-            <version>0.98.12-hadoop2</version>
+            <version>${hbase.version}</version>
             <exclusions>
                 <exclusion>
                     <artifactId>hadoop-annotations</artifactId>
