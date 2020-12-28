@@ -1,0 +1,133 @@
+mysql主从同步:
+    1、在备库 B 上通过 change master 命令，设置主库 A 的 IP、端口、用户名、密码，
+       以及要从哪个位置开始请求 binlog，这个位置包含文件名和日志偏移量。
+    2、在备库 B 上执行 start slave 命令，这时候备库会启动两个线程，就是图中的 io_thread 和 sql_thread。
+       其中 io_thread 负责与主库建立连接。
+    3、主库 A 校验完用户名、密码后，开始按照备库 B 传过来的位置，从本地读取 binlog，发给 B。
+    4、备库 B 拿到 binlog 后，写到本地文件，称为中转日志（relay log）。
+    5、sql_thread 读取中转日志，解析出日志里的命令，并执行。
+
+
+
+mysql> delete from t /*comment*/  where a>=4 and t_modified<='2018-11-10' limit 1;
+主从同步时执行上述语句
+  1、statement时可能有问题,因为binlog是原始sql,主从执行效果肯能不一致
+命令看 binlog 中的内容:
+    show binlog events in 'master.000001';
+
+查看row格式下的binlog内容
+   mysqlbinlog  -vv data/master.000001 --start-position=8900;
+
+主备时间不一致：
+    备库连接到主库的时候，会通过执行 SELECT UNIX_TIMESTAMP() 函数来获得当前主库的系统时间。
+    如果这时候发现主库的系统时间与自己不一致， 备库在执行 seconds_behind_master 计算的时候会自动扣掉这个差值。
+
+主备延迟：
+    1、主库 A 执行完成一个事务，写入 binlog，我们把这个时刻记为 T1;
+    2、之后传给备库 B，我们把备库 B 接收完这个 binlog 的时刻记为 T2;
+    3、备库 B 执行完成这个事务，我们把这个时刻记为 T3。
+    主备延迟即T3-T1
+    延迟原因：在网络正常的时候，日志从主库传给备库所需的时间是很短的，即 T2-T1 的值是非常小的。也就是说，网络正常情况下，
+            主备延迟的主要来源是备库接收完 binlog 和执行完这个事务之间的时间差。
+     第一种：首先，有些部署条件下，备库所在机器的性能要比主库所在的机器性能差。
+     第二种：常见的可能了，即备库的压力大
+     第三种：大事务
+
+由于主备延迟的存在，所以在主备切换的时候，就相应的有不同的策略。
+    可靠性优先策略：
+        1、判断备库 B 现在的 seconds_behind_master，如果小于某个值（比如 5 秒）继续下一步，否则持续重试这一步；
+        2、把主库 A 改成只读状态，即把 readonly 设置为 true；
+        3、判断备库 B 的 seconds_behind_master 的值，直到这个值变成 0 为止；
+        4、把备库 B 改成可读写状态，也就是把 readonly 设置为 false；
+        5、把业务请求切到备库 B。
+    可用性优先策略：
+       上述4/5放在前面,但是会有问题
+    主备切换的可用性优先策略会导致数据不一致。因此，大多数情况下，我都建议你使用可靠性优先策略。
+        毕竟对数据服务来说的话，数据的可靠性一般还是要优于可用性的。
+     使用 row 格式的 binlog 时，数据不一致的问题更容易被发现。而使用 mixed 或者 statement 格式的 binlog 时，数据很可能悄悄地就不一致了。
+        如果你过了很久才发现数据不一致的问题，很可能这时的数据不一致已经不可查，或者连带造成了更多的数据逻辑不一致。
+
+主备一致：
+    1、有时候一些运营类的查询语句会被放到备库上去查，设置为只读可以防止误操作；
+    2、防止切换逻辑有 bug，比如切换过程中出现双写，造成主备不一致；
+    3、可以用 readonly 状态，来判断节点的角色。
+    你可能会问，我把备库设置成只读了，还怎么跟主库保持同步更新呢？
+    这个问题，你不用担心。因为 readonly 设置对超级 (super) 权限用户是无效的，而用于同步更新的线程，就拥有超级权限
+      备库 B 跟主库 A 之间维持了一个长连接。主库 A 内部有一个线程，专门用于服务备库 B 的这个长连接。一个事务日志同步的完整过程是这样的：
+      在备库 B 上通过 change master 命令，设置主库 A 的 IP、端口、用户名、密码，以及要从哪个位置开始请求 binlog，这个位置包含文件名和日志偏移量。
+      在备库 B 上执行 start slave 命令，这时候备库会启动两个线程，就是图中的 io_thread 和 sql_thread。其中 io_thread 负责与主库建立连接。
+      主库 A 校验完用户名、密码后，开始按照备库 B 传过来的位置，从本地读取 binlog，发给 B。
+      备库 B 拿到 binlog 后，写到本地文件，称为中转日志（relay log）。
+      sql_thread 读取中转日志，解析出日志里的命令，并执行。
+
+现在你就能理解了，WAL 机制主要得益于两个方面：
+     1、redo log 和 binlog 都是顺序写，磁盘的顺序写比随机写速度要快；
+     2、组提交机制，可以大幅度降低磁盘的 IOPS 消耗。
+如果你的 MySQL 现在出现了性能瓶颈，而且瓶颈在 IO 上，可以通过哪些方法来提升性能呢？
+   1、设置 binlog_group_commit_sync_delay 和 binlog_group_commit_sync_no_delay_count 参数，
+      减少 binlog 的写盘次数。这个方法是基于“额外的故意等待”来实现的，因此可能会增加语句的响应时间，但没有丢失数据的风险。
+   2、将 sync_binlog 设置为大于 1 的值（比较常见是 100~1000）。这样做的风险是，主机掉电时会丢 binlog 日志。
+   3、将 innodb_flush_log_at_trx_commit 设置为 2。这样做的风险是，主机掉电的时候会丢数据。
+
+
+主从切换：
+  当我们把节点 B 设置成节点 A’（A'和A互为主备,A挂掉了）的从库的时候，需要执行一条 change master 命令：
+     CHANGE MASTER TO
+     MASTER_HOST=$host_name
+     MASTER_PORT=$port
+     MASTER_USER=$user_name
+     MASTER_PASSWORD=$password
+     MASTER_LOG_FILE=$master_log_name
+     MASTER_LOG_POS=$master_log_pos
+   换过程中不能丢数据，所以我们找位点的时候，总是要找一个“稍微往前”的，然后再通过判断跳过那些在从库 B 上已经执行过的事务
+   一种取同步位点的方法是这样的：
+       1、等待新主库 A’把中转日志（relay log）全部同步完成；
+       2、在 A’上执行 show master status 命令，得到当前 A’上最新的 File 和 Position；
+       3、取原主库 A 故障的时刻 T；
+       4、用 mysqlbinlog 工具解析 A’的 File，得到 T 时刻的位点。
+           mysqlbinlog File --stop-datetime=T --start-datetime=T
+
+       这种方式获取的位点通常不太精确：
+           假设在 T 这个时刻，主库 A 已经执行完成了一个 insert 语句插入了一行数据 R，
+              并且已经将 binlog 传给了 A’和 B，然后在传完的瞬间主库 A 的主机就掉电了。
+          1、在从库 B 上，由于同步了 binlog， R 这一行已经存在；
+          2、在新主库 A’上， R 这一行也已经存在，日志是写在 123 这个位置之后的；
+          3、我们在从库 B 上执行 change master 命令，指向 A’的 File 文件的 123 位置，就会把插入 R 这一行数据的 binlog 又同步到从库 B 去执行。
+         这时候，从库 B 的同步线程就会报告 Duplicate entry ‘id_of_R’ for key ‘PRIMARY’ 错误，提示出现了主键冲突，然后停止同步。
+         所以，通常情况下，我们在切换任务的时候，要先主动跳过这些错误，有两种常用的方法。
+             1、一种做法是，主动跳过一个事务，可能需要重复多次。跳过命令的写法是：
+                     set global sql_slave_skip_counter=1;
+                     start slave;
+             2、另外一种方式是，通过设置 slave_skip_errors 参数，直接设置跳过指定的错误。
+                     在执行主备切换时，有这么两类错误，是经常会遇到的：
+                        1062 错误是插入数据时唯一键冲突；
+                        1032 错误是删除数据时找不到行。
+
+         但这两种操作都很复杂，而且容易出错。
+         所以，MySQL 5.6 版本引入了 GTID，彻底解决了这个困难
+              GTID=server_uuid:gno
+              server_uuid 是一个实例第一次启动时自动生成的，是一个全局唯一的值；
+              gno 是一个整数，初始值是 1，每次提交事务的时候分配给这个事务，并加 1。
+            事务 id 是在事务执行过程中分配的，如果这个事务回滚了，事务 id 也会递增，而 gno 是在事务提交的时候才会分配，gtid是连续的，事务id不一定连续。
+              CHANGE MASTER TO
+              MASTER_HOST=$host_name
+              MASTER_PORT=$port
+              MASTER_USER=$user_name
+              MASTER_PASSWORD=$password
+              master_auto_position=1
+            我们在实例 B 上执行 start slave 命令，取 binlog 的逻辑是这样的：
+            1、实例 B 指定主库 A’，基于主备协议建立连接。
+            2、实例 B 把 set_b 发给主库 A’。
+            3、实例 A’算出 set_a 与 set_b 的差集，也就是所有存在于 set_a，但是不存在于 set_b 的 GTID 的集合，
+                判断 A’本地是否包含了这个差集需要的所有 binlog 事务。
+              a. 如果不包含，表示 A’已经把实例 B 需要的 binlog 给删掉了，直接返回错误；
+              b. 如果确认全部包含，A’从自己的 binlog 文件里面，找出第一个不在 set_b 的事务，发给 B；
+            这跟基于位点的主备协议不同。基于位点的协议，是由备库决定的，备库指定哪个位点，主库就发哪个位点，不做日志的完整性判断。
+
+     set sql_log_bin=off 关掉 binlog。
+     互为主备的两个实例加索引：这两个互为主备关系的库还是实例 X 和实例 Y，且当前主库是 X，并且都打开了 GTID 模式。这时的主备切换流程可以变成下面这样：
+        在实例 X 上执行 stop slave。
+        在实例 Y 上执行 DDL 语句。注意，这里并不需要关闭 binlog。
+        执行完成后，查出这个 DDL 语句对应的 GTID，并记为 server_uuid_of_Y:gno。
+        到实例 X 上执行以下语句序列：
+     这样做的目的在于，既可以让实例 Y 的更新有 binlog 记录，同时也可以确保不会在实例 X 上执行这条更新。
