@@ -25,6 +25,7 @@
         <module>calcite</module>
         <module>calcite-test</module>
         <module>canal</module>
+        <module>monitor</module>
     </modules>
 
     <name>forfun</name>

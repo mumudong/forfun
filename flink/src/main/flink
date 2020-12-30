@@ -50,3 +50,40 @@ flink 的 yarn 客户端通过下面的配置参数来控制容器的故障恢�
     yarn.reallocate-failed：这个参数控制了flink是否应该重新分配失败的taskmanager容器。默认是true。
 	yarn.maximum-failed-containers：applicationMaster可以接受的容器最大失败次数，达到这个参数，就会认为yarn session失败。默认这个次数和初始化请求的taskmanager数量相等(-n 参数指定的)。
 	yarn.application-attempts：applicationMaster重试的次数。如果这个值被设置为1(默认就是1)，当application master失败的时候，yarn session也会失败。设置一个比较大的值的话，yarn会尝试重启applicationMaster。
+
+
+
+flink metrics:
+      TaskManagerMetricGroup
+          TaskManagerJobMetricGroup
+                TaskMetricGroup
+                     TaskIOMetricGroup
+                     OperatorMetricGroup
+      JobManagerMetricGroup
+          JobManagerJobMetricGroup
+
+   System metrics:
+         Master 级别和 Work 级别的 JVM 参数
+         Network
+   User-defined Metrics:
+         User-defined Metrics 现在提及的都是 datastream 的 API，table、sql 可能需要 context 协助，但如果写 UDF，它们其实是大同小异的
+         Datastream 的 API 是继承 RichFunction ，继承 RichFunction 才可以有 Metrics 的接口。然后通过 RichFunction 会带来一个 getRuntimeContext().getMetricGroup().addGroup(…) 的方法
+   获取metrics:
+         1、 WebUI 上看到
+         2、其次可以通过 RESTful API 获取，RESTful API 对程序比较友好，比如写自动化脚本或程序，自动化运维和测试，通过 RESTful API 解析返回的 Json 格式对程序比较友好
+         3、最后，还可以通过 Metric Reporter 获取，监控主要使用 Metric Reporter 功能。
+   了解背景和原理会对使用有更深刻的理解。
+         WebUI 和 RESTful API 是通过中心化节点定期查询把各个组件中的 Metrics 拉上来的实现方式。其中，fetch 不一定是实时更新的，默认为 10 秒，所以有可能在 WebUI 和 RESTful API 中刷新的数据不是实时想要得到的数据；
+         此外，fetch 有可能不同步，比如两个组件，一边在加另一边没有动，可能是由于某种原因超时没有拉过来，这样是无法更新相关值的，它是 try best 的操作，所以有时我们看到的指标有可能会延迟，或许等待后相关值就更新了。
+         MetricReporter 不一样，每一个单独的点直接汇报，它没有中心化节点帮助做聚合。如果想要聚合，需要在第三方系统中进行，比如常见的 TSDB 系统。当然，不是中心化结构也是它的好处，它可以免去中心化节点带来的问题，比如内存放不下等
+            metrics.reporters: your_monitor,jmx
+            metrics.reporter.jmx.class: org.apache.flink.metrics.jmx.JMXReporter
+            metrics.reporter.jmx.port: 1025-10000
+            metrics.reporter.your_monitor.class: com.your_company.YourMonitorClass
+            metrics.reporter.your_monitor.interval: 10 SECONDS
+            metrics.reporter.your_monitor.config.a: your_a_value
+            metrics.reporter.your_monitor.config.b: your_b_value
+
+
+
+

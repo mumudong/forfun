@@ -1,0 +1,35 @@
+
+prometheus配置文件： /etc/prometheus/prometheus.yml
+配置拉取cadvisor监控信息
+- job_name: cadvisor
+  static_configs:
+  - targets:
+    - localhost:8080
+
+启动：prometheus --config.file=/etc/prometheus/prometheus.yml --storage.tsdb.path=/data/prometheus
+
+
+Blackbox Exporter：
+    而从完整的监控逻辑的角度，除了大量的应用白盒监控以外，还应该添加适当的黑盒监控。
+    黑盒监控即以用户的身份测试服务的外部可见性，常见的黑盒监控包括HTTP探针、TCP探针等用于检测站点或者服务的可访问性，以及访问效率等
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
