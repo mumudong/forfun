@@ -96,10 +96,12 @@ public class AppClient {
         // TODO 添加本地资源
         Map<String, LocalResource> localResources = new HashMap<>(1 << 4);
         FileSystem fs = FileSystem.get(hadoopConf);
-        String appMasterJarPath = "yarn-application-demo-1.0-SNAPSHOT.jar";
-        String appMasterJar = "D:\\Users\\Bigdata\\learning\\source\\yarn-application-demo\\target\\yarn-application-demo-1.0-SNAPSHOT.jar" ;
+        String srcJarPath = "D:\\Users\\Bigdata\\learning\\source\\yarn-application-demo\\target\\yarn-application-demo-1.0-SNAPSHOT.jar" ;
+        String dstJarPath = "yarn-application-demo-1.0-SNAPSHOT.jar";
+
         ApplicationId appId = applicationSubmissionContext.getApplicationId();
-        addToLocalResources(fs,appMasterJar,appMasterJarPath,appId.toString(),localResources,null);
+        //jar包路径、jar包权限级别等
+        addToLocalResources(fs,srcJarPath,dstJarPath,appId.toString(),localResources,null);
 
         // TODO 添加运行环境
         Map<String, String> env = new HashMap<>(1 << 4);
@@ -156,13 +158,13 @@ public class AppClient {
         applicationSubmissionContext.setApplicationTags(tags);
 
         // 设置节点标签
-        //  applicationSubmissionContext.setNodeLabelExpression();
+//          applicationSubmissionContext.setNodeLabelExpression();
 
         // 设置applicationMaster的container运行资源请求
-//        String hostName = "127.0.0.1";
-//        int numContainers = 1;
-//        ResourceRequest amRequest = ResourceRequest.newInstance(Priority.newInstance(10), hostName, Resource.newInstance(memory, vCores), numContainers);
-//        applicationSubmissionContext.setAMContainerResourceRequest(amRequest);
+        String hostName = "127.0.0.1";
+        int numContainers = 1;
+        ResourceRequest amRequest = ResourceRequest.newInstance(Priority.newInstance(10), hostName, Resource.newInstance(memory, vCores), numContainers);
+        applicationSubmissionContext.setAMContainerResourceRequest(amRequest);
 
         // 应用失败重试时间间隔
         applicationSubmissionContext.setAttemptFailuresValidityInterval(30 * 1000L);

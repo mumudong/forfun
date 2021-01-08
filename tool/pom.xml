@@ -17,6 +17,11 @@
         <version>build210</version>
     </dependency>
     <dependency>
+        <groupId>org.reflections</groupId>
+        <artifactId>reflections</artifactId>
+        <version>0.9.11</version>
+    </dependency>
+    <dependency>
         <groupId>org.apache.curator</groupId>
         <artifactId>curator-recipes</artifactId>
         <version>4.0.0</version>
