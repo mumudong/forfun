@@ -1,0 +1,65 @@
+
+
+ApplicationMaster管理涉及到了4大类,ApplicationMasterLauncher,AMLivelinessMonitor,ApplicationMasterService,以及ApplicationMaster自身类.
+    下面介绍一下这些类的用途,在Yarn中,每个类都会有自己明确的功能模块的区分.
+
+1.ApplicationMasterLauncher--姑且叫做AM启动关闭事件处理器,他既是一个服务也是一个处理器,在这个类中,只处理2类事件,launch和cleanup事件.分别对应启动应用和关闭应用的情形.
+
+2.AMLivelinessMonitor--这个类从名字上可以看出他是监控类,监控的对象是AM存活状态的监控类,检测的方法与之前的HDFS一样,都是采用heartbeat的方式,如果有节点过期了,将会触发一次过期事件.
+
+3.ApplicationMasterService--AM请求服务处理类.AMS存在于ResourceManager,中,服务的对象是各个节点上的ApplicationMaster,负责接收各个AM的注册请求,更新心跳包信息等.
+
+4.ApplicationMaster--节点应用管理类,简单的说,ApplicationMaster负责管理整个应用的生命周期.
+
+
+===========================================================================================================================================
+https://blog.csdn.net/u012151684/article/details/108228956
+ YARN框架作为一个资源管理系统，其最重要和最基础的两个功能是资源调度和资源隔离：
+
+资源调度：由resourcemanager完成，在resourcemanager的组件及资源调度已有介绍；
+资源隔离：各个nodemanager监控隔离完成；
+       YARN对其内部所拥有的内存资源和CPU资源采取了不同的资源隔离方案。
+       对于内存资源，它是一种限制性资源，它的量的大小直接决定应用程序的死活，因为应用程序到达内存限制，会发生OOM，就会被杀死。
+       CPU资源一般用Cgroups进行资源控制。内存资源隔离除Cgroups之外提供了另外一个更灵活的方案，就是线程监控方案。
+
+CPU资源隔离
+        默认情况下，NodeManager未启用任何对CPU资源的隔离机制，如果需要启用该机制需使用LinuxContainerExecutor，
+    它能够以应用程序提交者的身份创建文件、运行Container和销毁Container。相比于DefaultContainerExecutor采用NodeManager启动者的身份执行这些操作，
+    LinuxContainerExecutor具有更高的安全性。LinuxContainerExecutor的核心设计思想是赋予NodeManager启动者以root权限，进而使其拥有足够的权限以任意用户身份执行一些操作，
+    从而使得NodeManager执行者可以将Container使用的目录和文件的拥有者修改为应用程序的提交者，并以应用程序提交者的身份运行Container，
+    防止所有Container以NodeManager执行者身份运行进而带来的各种风险。上述机制的实现在YARN的NodeManager采用C语言实现了一个setuid功能的工具container-executor，
+    该脚本拥有root权限，可以完成任意操作，其可执行脚本位于：/opt/yarn/hadoop/bin/container-executor。YARN正是通过该脚本创建出Cgroups层级树以及完成Cgroups属性设置等操作。
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
