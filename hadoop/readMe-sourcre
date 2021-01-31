@@ -3,13 +3,34 @@
 ApplicationMaster管理涉及到了4大类,ApplicationMasterLauncher,AMLivelinessMonitor,ApplicationMasterService,以及ApplicationMaster自身类.
     下面介绍一下这些类的用途,在Yarn中,每个类都会有自己明确的功能模块的区分.
 
-1.ApplicationMasterLauncher--姑且叫做AM启动关闭事件处理器,他既是一个服务也是一个处理器,在这个类中,只处理2类事件,launch和cleanup事件.分别对应启动应用和关闭应用的情形.
+      1.ApplicationMasterLauncher--姑且叫做AM启动关闭事件处理器,他既是一个服务也是一个处理器,在这个类中,只处理2类事件,launch和cleanup事件.分别对应启动应用和关闭应用的情形.
 
-2.AMLivelinessMonitor--这个类从名字上可以看出他是监控类,监控的对象是AM存活状态的监控类,检测的方法与之前的HDFS一样,都是采用heartbeat的方式,如果有节点过期了,将会触发一次过期事件.
+      2.AMLivelinessMonitor--这个类从名字上可以看出他是监控类,监控的对象是AM存活状态的监控类,检测的方法与之前的HDFS一样,都是采用heartbeat的方式,如果有节点过期了,将会触发一次过期事件.
 
-3.ApplicationMasterService--AM请求服务处理类.AMS存在于ResourceManager,中,服务的对象是各个节点上的ApplicationMaster,负责接收各个AM的注册请求,更新心跳包信息等.
+      3.ApplicationMasterService--AM请求服务处理类.AMS存在于ResourceManager,中,服务的对象是各个节点上的ApplicationMaster,负责接收各个AM的注册请求,更新心跳包信息等.
 
-4.ApplicationMaster--节点应用管理类,简单的说,ApplicationMaster负责管理整个应用的生命周期.
+      4.ApplicationMaster--节点应用管理类,简单的说,ApplicationMaster负责管理整个应用的生命周期.
+
+ResourceManager中的NM节点管理
+
+      1.NodeManager.java--节点管理类,这个类是yarn-resourcemanager包中的类,不是yarn-nodemanager中的同名类,这个类是本篇文章的核心角色类,
+
+      2.NodesListManager--节点列表管理类，这个类中管理了类似黑名单，白名单的节点列表形式。
+
+      3.NMLivelinessMonitor--节点存活状态监控线程类，与之前的AMLivelinessMonitor线程的原理类似，最简单的心跳更新检查。
+
+      4.ResourceTrackerService--节点服务管理对象，负责与各个NodeManager通信。包括NM在此服务上的注册请求处理，心跳更新操作等等。
+
+
+
+
+
+
+
+
+
+
+
 
 
 ===========================================================================================================================================
