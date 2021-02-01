@@ -21,7 +21,58 @@ ResourceManager中的NM节点管理
 
       4.ResourceTrackerService--节点服务管理对象，负责与各个NodeManager通信。包括NM在此服务上的注册请求处理，心跳更新操作等等。
 
+ResourceManager HA之应用状态存储与恢复
+                         RmState
+          ApplicationState   ApplicationState
+   ApplicationAttemptState ..
 
+         RmStateStore应用状态保存的方式：
+             1.MemoryRMStateStore--信息状态保存在内存中的实现类。
+             2.FileSystemRMStateStore--信息状态保存在HDFS文件系统中，这个是做了持久化了。
+             3.NullRMStateStore--do nothing，什么都不做，就是不保存应用状态信息。
+             4.ZKRMStateStore--信息状态保存在Zookeeper中。
+
+         RMDelegationonTokenIdentifier：保存RM身份标识位到时间的映射,可以用来表名此RM是旧的,还是新启动的RM
+
+Journalnode
+       排查公司Hadoop集群性能问题时,发现Hadoop集群整体处理速度非常缓慢,平时只需要跑几十分钟的任务时间一下子上张到了个把小时,起初怀疑是网络原因,
+    后来证明的确是有一部分这块的原因,但是过了没几天,问题又重现了,这次就比较难定位问题了,后来分析hdfs请求日志和Ganglia的各项监控指标,
+    发现namenode的挤压请求数持续比较大,说明namenode处理速度异常,然后进而分析出是因为写journalnode的editlog速度慢问题导致的,
+    后来发现的确是journalnode的问题引起的,后来的原因是因为journalnode的editlog目录没创建,导致某台节点写edillog一直抛FileNotFoundException,
+    所以在这里提醒大家一定要重视一些小角色,比如JournalNode.
+
+    journalNode的作用是存放EditLog的,在MR1中editlog是和fsimage存放在一起的然后SecondNamenode做定期合并
+    QuorumJournalManager:
+       在配置中定义JournalNode节点的个数是可多个的,所以一定会存在一个类似管理者这样的角色存在,而这个管理者就是QJM,全程QuorumJournalManager
+       JournalManager可以写很多记录数据给多个远程JournalNode节点
+       private final AsyncLoggerSet loggers,在此对象中包含了AsyncLogger对象列表,每个logger对象管控一个独立的Journalnode
+       public class IPCLoggerChannel implements AsyncLogger
+       因为管道类方法与真正客户端方法继承了相同的协议,方法定义是相同的,下面列举几个常见方法
+
+    singleThreadExecutor单线程线程池一般执行的是写操作相关,而并行线程池则进行的是读操作,而且所有的这些操作采用的异步执行的方式,
+    保证了高效性.服务端执行操作函数后,立刻得到一个call列表,并等待回复值
+
+    JournalNode和Journal
+    与服务端对应的客户端,对每个JournalNode进行操作执行的类是JournalNode
+
+监控：
+        任何分布式系统在不断演变的过程中,必然都会经过有小变到大的过程,中间也必定会由不稳定到逐步稳定的过程.在所有的这些系统能够稳定运行的一个前提是,
+     完整的监控和报警系统.这个模块是系统保持稳定最最基础的模块服务.只有在这块功能完善的情况下,才会让系统的维护者更高效的定位到问题所在,减少不必要的时间消耗,
+     才会有更多的时间去做其他方面的一些优化.今天我所主要描述的就是对于Hadoop的强大监控工具Ganglia.
+
+        Ganglia是开源的集群监控项目,代码可以在github社区进行下载.Ganglia的架构设计也是类似于Client-Server的模式,
+     Client端会开启gmond进程进行客户端监控数据的收集,Server端会拉取client端数据,server端对数据进行收集并进行页面的展示
+
+       监控指标：以点分隔,前半部分是上下文dfs、jvm,后半部分是具体的统计名称
+          dfs.NameNode metrics
+             (namenode和FSNameSystem调用)
+          dfs.datanode metrics --> DataNodeMetrics
+             (datanode类中,dataxceiver变量,调用blockReceiver中receiveBlock方法,给datanodeMetrics变量赋值)
+          dfs.namenode metrics
+          dfs.FSNamesystem metrics
+          jvm.JvmMetrics metrics
+
+https://blog.csdn.net/wankunde/article/details/89792117
 
 
 
