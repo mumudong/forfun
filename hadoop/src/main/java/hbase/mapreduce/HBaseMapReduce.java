@@ -33,7 +33,7 @@ public class HBaseMapReduce   {
             Put put = new Put(key.get());
             //choose the info:name and info:age to put
             for (Cell cell : value.rawCells()) {
-                System.out.println("family:" + Bytes.toString(cell.getFamily())+"---->"+Bytes.toString(cell.getQualifier()));
+//                System.out.println("family:" + Bytes.toString(cell.getFamily())+"---->"+Bytes.toString(cell.getQualifier()));
 
                 if ("info".equals(Bytes.toString(CellUtil.cloneFamily(cell)))) {
                         put.add(cell);

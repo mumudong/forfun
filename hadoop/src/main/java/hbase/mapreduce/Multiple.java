@@ -31,10 +31,10 @@ public class Multiple {
             Put put = new Put(key.get());
             byte[] bytes = null ;
             for(Cell cell:value.rawCells()){
-                put.add(cell.getFamily(),
-                        cell.getQualifier(),
-                        cell.getValue());
-                bytes = cell.getFamily();
+                put.add(cell.getFamilyArray(),
+                        cell.getQualifierArray(),
+                        cell.getValueArray());
+                bytes = cell.getFamilyArray();
             }
             InputSplit splitt = context.getInputSplit();
             if(bytes != null && splitt instanceof TableSplit) {
@@ -51,10 +51,10 @@ public class Multiple {
             Put put = new Put(key.get());
             byte[] bytes = null ;
             for(Cell cell:value.rawCells()){
-                put.add(cell.getFamily(),
-                        cell.getQualifier(),
-                        cell.getValue());
-                bytes = cell.getFamily();
+                put.add(cell.getFamilyArray(),
+                        cell.getQualifierArray(),
+                        cell.getValueArray());
+                bytes = cell.getFamilyArray();
             }
             if(bytes != null)
                 put.add(bytes, Bytes.toBytes("student"),Bytes.toBytes("我来自student表"));
