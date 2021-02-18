@@ -1,4 +1,4 @@
-package common;
+package javalearn.dirdog;
 
 import static java.nio.file.LinkOption.NOFOLLOW_LINKS;
 

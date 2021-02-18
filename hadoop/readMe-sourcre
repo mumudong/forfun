@@ -1,4 +1,4 @@
-
+hadoop源码 http://www.360doc.com/content/17/0606/10/14808334_660413748.shtml
 
 ApplicationMaster管理涉及到了4大类,ApplicationMasterLauncher,AMLivelinessMonitor,ApplicationMasterService,以及ApplicationMaster自身类.
     下面介绍一下这些类的用途,在Yarn中,每个类都会有自己明确的功能模块的区分.

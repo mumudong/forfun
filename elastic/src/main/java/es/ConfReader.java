@@ -14,7 +14,7 @@ public class ConfReader {
                 if(prop == null) {
                     prop = new Properties();
                     try {
-                        // classloader.getresouceasstream是从根目录找/
+                        // javalearn.classloader.getresouceasstream是从根目录找/
                         // class.getresourceasstream（""）是从当前class目录找
                         //                          （"/"）是从根目录找
                         prop.load(ConfReader.class.getClassLoader().getResourceAsStream("es-config.properties"));
