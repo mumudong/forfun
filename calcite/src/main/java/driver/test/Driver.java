@@ -12,7 +12,8 @@ import java.util.Properties;
 import java.util.stream.Collectors;
 
 /**
- * 在这里，我们定义jdbc url字符串，并在创建连接的时候，对url进行分析，并将json的名字，注册到root schema 。 当然这里是最小化实现
+ * 在这里，我们定义jdbc url字符串，并在创建连接的时候，对url进行分析，并将json的名字，注册到root schema 。
+ * 当然这里是最小化实现
  */
 public class Driver extends org.apache.calcite.jdbc.Driver {
     public static final String CONNECT_STRING_PREFIX = "jdbc:json:";

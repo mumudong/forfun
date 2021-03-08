@@ -1,3 +1,7 @@
+flink源码教程
+    https://blog.csdn.net/qq_22222499/category_9290990.html
+    https://www.imooc.com/article/254019
+
 1、flink和storm同样是真实流计算,为什么flink比storm快呢?
    首先,单单就数据计算来说,速度是一样的
     1> 数据传输优化,分为进程间和进程内

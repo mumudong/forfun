@@ -4,6 +4,8 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import static sun.misc.Version.println;
+
 public class CompleteFutureTest {
     public static void main(String[] args) throws Exception{
         CompletableFuture<String> one = new CompletableFuture<>();
@@ -31,6 +33,10 @@ public class CompleteFutureTest {
                 e.printStackTrace();
             }
             return s.length();
+        });
+
+        completableFutureThree.thenCompose((x)->{
+            return CompletableFuture.runAsync(()->{System.out.println(x);});
         });
 
         System.out.println("阻塞方式获取执行结果:" + completableFutureThree.get());
