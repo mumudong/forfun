@@ -1,6 +1,14 @@
+clickhouse应用：https://my.oschina.net/u/4658124/blog/4804625
+
+flink rpc https://blog.lovedata.net/106c955e.html
+flink perjob源码https://www.bbsmax.com/A/QW5YRNDGdm/
+flink akka: https://blog.lovedata.net/106c955e.html
+
+
+
 flink可以通过以下三种模式部署：
-    Session Mode
-    Per-Job Mode
+    Session Mode：启动一个session-cluster,后续可以向此cluster提交任务
+    Per-Job Mode：客户端生成jobgraph并上传至hdfs,appMaster启动时获取该jobGraph并执行任务
     Application Mode
 
     以上方式主要区别在于

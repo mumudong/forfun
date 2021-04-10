@@ -29,7 +29,7 @@ public class Convert_dict extends GenericUDF{
 	ObjectInspector   objOut;  
 	
 	private static String driverName = "org.apache.hive.jdbc.HiveDriver";
-    private static String url = "jdbc:hive2://10.167.222.103:10000/ods";
+    private static String url = "jdbc:hive2://xxxxxxxx:10000/ods";
     private static String user = "hdfs";
     private static String password = "hdfs";
     private   String sql = "";

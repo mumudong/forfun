@@ -1,3 +1,10 @@
+#查看edit log
+hdfs oev -i editlog文件 -o out.txt -p stats
+#使用oiv命令将fsimage文件解析为csv文件
+hdfs oiv -i /hdfs_meta/fsimage_xxxxxxxxx -t /temp/dir -o /hdfs_meta/fsimage.csv -p Delimited
+
+
+
 hadoop配置文件中可配置<final>true<final>标识不可被修改
 管理员可通过参数mapred.cluster.max.map.memory.mb和mapred.cluster.max.reduce.memory.mb限制用户配置的任务最大内存使用量
 Map Task完成数目达到一定比例（由参数mapred.reduce.slowstart.completed.maps指定，默认是0.05，即5%）后，才开始调度Reduce Task

@@ -46,6 +46,8 @@ public class Server {
             Iterator<SelectionKey> iterator = selectionKeys.iterator();
             while(iterator.hasNext()){
                 SelectionKey key = iterator.next();
+                System.out.println("key.isConnectable --> " + key.isConnectable());
+                System.out.println("key.isValid --> " + key.isValid());
                 if(key.isAcceptable()){
                     ServerSocketChannel serverChann = (ServerSocketChannel) key.channel();
                     SocketChannel clientChanner = serverChann.accept();

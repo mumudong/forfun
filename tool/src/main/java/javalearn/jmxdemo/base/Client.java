@@ -1,4 +1,4 @@
-package javalearn.jmxdemo.client;
+package javalearn.jmxdemo.base;
 
 import javalearn.jmxdemo.base.HelloMBean;
 
@@ -6,16 +6,7 @@ import java.io.IOException;
 import java.util.Iterator;
 import java.util.Set;
 
-import javax.management.Attribute;
-import javax.management.InstanceNotFoundException;
-import javax.management.IntrospectionException;
-import javax.management.MBeanException;
-import javax.management.MBeanInfo;
-import javax.management.MBeanServerConnection;
-import javax.management.MBeanServerInvocationHandler;
-import javax.management.ObjectInstance;
-import javax.management.ObjectName;
-import javax.management.ReflectionException;
+import javax.management.*;
 import javax.management.remote.JMXConnector;
 import javax.management.remote.JMXConnectorFactory;
 import javax.management.remote.JMXServiceURL;
@@ -32,11 +23,14 @@ public class Client {
 
         // MBean的总数
         System.out.println("MBean count = " + mbsc.getMBeanCount());
-        ObjectName mbeanName = new ObjectName("allen:name=HelloWorld");
+        ObjectName mbeanName = new ObjectName("javalearn.jmxdemo.base:type=Hello");
 
         // 对name属性的操作（属性名的第一个字母要大写）
-        mbsc.setAttribute(mbeanName, new Attribute("Name", "Allen"));// 设值
+//        mbsc.setAttribute(mbeanName, new Attribute("Name", "Allen"));// 设值
         System.out.println("Name = " + mbsc.getAttribute(mbeanName, "Name"));// 取值
+        HelloMBean hello = JMX.newMBeanProxy(mbsc, mbeanName,HelloMBean.class);
+        hello.sayHello();
+        System.out.println("hello.add()" + hello.add(1,2));
 
         // 得到proxy代理后直接调用的方式
         proxyInvokeHelloMBean(mbsc, mbeanName);
@@ -75,8 +69,8 @@ public class Client {
                                                ObjectName mbeanName) throws InstanceNotFoundException,
             MBeanException, ReflectionException, IOException {
 
-        mbsc.invoke(mbeanName, "printHello", null, null);
-        mbsc.invoke(mbeanName, "printHello", new Object[]
+        mbsc.invoke(mbeanName, "sayHello", null, null);
+        mbsc.invoke(mbeanName, "sayHello", new Object[]
                 {"kimmy"}, new String[]
                 {String.class.getName()});
     }
